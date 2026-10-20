@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hyper_axis/hyper_axis.dart';
+
+import 'src/hyper_axis_demo_page.dart';
 
 void main() {
   runApp(const HyperAxisExampleApp());
@@ -11,11 +12,19 @@ final class HyperAxisExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'HyperAxis',
-      theme: ThemeData(colorSchemeSeed: Colors.indigo),
-      home: const Scaffold(
-        body: Center(child: Text('HyperAxis Dart $hyperAxisDartVersion')),
+      debugShowCheckedModeBanner: false,
+      title: 'HyperAxis 移动端示例',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xff5b5bd6),
+          brightness: Brightness.light,
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          border: OutlineInputBorder(),
+        ),
+        useMaterial3: true,
       ),
+      home: const HyperAxisDemoPage(),
     );
   }
 }
