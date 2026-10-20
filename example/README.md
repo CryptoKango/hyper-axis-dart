@@ -1,17 +1,11 @@
-# hyper_axis_example
+# HyperAxis Flutter 示例
 
-Demonstrates how to use the hyper_axis package.
+演示 Android 与 iOS 应用如何通过 `package:hyper_axis/hyper_axis.dart` 使用 HyperAxis SDK。
+该示例不保存私钥，也不会连接真实账户或提交真实订单。
 
-## Getting Started
+```bash
+flutter pub get
+flutter run
+```
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+支持范围：Android API 24 及以上、iOS 13 及以上。

@@ -5,7 +5,8 @@ set -euo pipefail
 readonly expected_codegen_version="2.13.0"
 readonly script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly repository_root="$(cd "${script_dir}/.." && pwd)"
-readonly rust_crate="${repository_root}/../hyper-axis/crates/hyper-axis-ffi"
+readonly rust_root="$(${script_dir}/fetch_rust_core.sh)"
+readonly rust_crate="${rust_root}/crates/hyper-axis-ffi"
 
 if ! command -v flutter_rust_bridge_codegen >/dev/null 2>&1; then
   echo "错误：未找到 flutter_rust_bridge_codegen ${expected_codegen_version}。" >&2
@@ -21,7 +22,6 @@ fi
 
 if [[ ! -f "${rust_crate}/Cargo.toml" ]]; then
   echo "错误：未找到 Rust FFI crate：${rust_crate}" >&2
-  echo "请将 hyper-axis 与 hyper-axis-dart 放在同一父目录下。" >&2
   exit 1
 fi
 

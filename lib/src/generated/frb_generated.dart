@@ -78,7 +78,8 @@ class HyperAxisRustLib
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
         stem: 'hyper_axis_ffi',
-        ioDirectory: '../hyper-axis/crates/hyper-axis-ffi/target/release/',
+        ioDirectory:
+            '.dart_tool/hyper-axis-core/crates/hyper-axis-ffi/target/release/',
         webPrefix: 'pkg/',
         wasmBindgenName: 'wasm_bindgen',
       );

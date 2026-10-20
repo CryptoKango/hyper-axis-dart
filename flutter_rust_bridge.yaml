@@ -1,5 +1,5 @@
 rust_input: crate::api
-rust_root: ../hyper-axis/crates/hyper-axis-ffi
+rust_root: .dart_tool/hyper-axis-core/crates/hyper-axis-ffi
 dart_output: lib/src/generated
 dart_entrypoint_class_name: HyperAxisRustLib
 dart_format_line_length: 80

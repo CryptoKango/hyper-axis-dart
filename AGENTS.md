@@ -46,6 +46,9 @@ example/                     # 最小集成示例
 - 生成文件只由固定版本生成器更新，不得手工编辑。
 - FRB runtime 与 codegen 固定为 `2.13.0`；升级必须同步修改 Rust crate、Dart 包、生成脚本与兼容矩阵。
 - Web 不由本仓库交付，`flutter_rust_bridge.yaml` 必须保持 `web: false`。
+- 平台范围仅限 Android API 24+ 与 iOS 13+；示例、CI 和发布产物不得声明其他平台支持。
+- Native Assets 只能获取兼容矩阵中固定 tag/commit 的 Rust Core，下载内容必须校验仓库内
+  固定的 SHA256；禁止跟随 `master`、跳过 `--locked` 或静默回退到未校验产物。
 - 初始化必须幂等；Bridge 失败统一转为 `HyperAxisException`。
 - NonceManager 按 master account 或 API wallet 隔离，禁止进程级全局 signer/nonce。
 

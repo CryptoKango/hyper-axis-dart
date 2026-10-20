@@ -29,3 +29,7 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 /build/
 /coverage/
+example/linux/
+example/macos/
+example/web/
+example/windows/
