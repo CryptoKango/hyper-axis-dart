@@ -1,0 +1,8 @@
+rust_input: crate::api
+rust_root: ../hyper-axis/crates/hyper-axis-ffi
+dart_output: lib/src/generated
+dart_entrypoint_class_name: HyperAxisRustLib
+dart_format_line_length: 80
+add_mod_to_lib: false
+web: false
+stop_on_error: true
