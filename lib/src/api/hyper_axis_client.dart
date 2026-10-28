@@ -4,6 +4,7 @@ import '../error/hyper_axis_exception.dart';
 import '../logging/hyper_axis_log.dart';
 import '../models/orders.dart';
 import '../version.dart';
+import 'retryable_async_cache.dart';
 
 /// Stable application-facing facade over the HyperAxis Rust bridge.
 ///
@@ -11,7 +12,8 @@ import '../version.dart';
 /// nonce manager is exposed as an explicit session object instead of global
 /// mutable state.
 final class HyperAxisClient {
-  static Future<HyperAxisBridge>? _nativeBridge;
+  static final RetryableAsyncCache<HyperAxisBridge> _nativeBridge =
+      RetryableAsyncCache<HyperAxisBridge>();
 
   /// Initializes the generated native bridge and returns a client facade.
   ///
@@ -19,8 +21,9 @@ final class HyperAxisClient {
   /// [HyperAxisException] with [HyperAxisErrorCode.bridgeUnavailable] when no
   /// compatible native artifact can be loaded.
   static Future<HyperAxisClient> initialize() async {
-    final HyperAxisBridge bridge = await (_nativeBridge ??=
-        FrbHyperAxisBridge.initialize());
+    final HyperAxisBridge bridge = await _nativeBridge.getOrInitialize(
+      FrbHyperAxisBridge.initialize,
+    );
     return HyperAxisClient.withBridge(bridge);
   }
 

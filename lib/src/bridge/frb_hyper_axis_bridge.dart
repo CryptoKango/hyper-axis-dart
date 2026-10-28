@@ -17,6 +17,12 @@ final class FrbHyperAxisBridge implements HyperAxisBridge {
       await HyperAxisRustLib.init();
       return const FrbHyperAxisBridge._();
     } on Object catch (error, stackTrace) {
+      // FRB installs its entrypoint state before running Rust initializers. If
+      // an initializer fails, leaving that partial state installed makes the
+      // next init attempt fail immediately with "already initialized".
+      if (HyperAxisRustLib.instance.initialized) {
+        HyperAxisRustLib.dispose();
+      }
       throw HyperAxisException(
         code: HyperAxisErrorCode.bridgeUnavailable,
         message: 'Unable to initialize the HyperAxis native bridge.',
