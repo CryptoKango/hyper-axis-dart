@@ -258,6 +258,13 @@ final class HyperAxisFinalizedAction {
 
   /// Recovered signer address normalized by Rust.
   final String recoveredSigner;
+
+  /// Encodes the exact finalized action accepted by Rust transport helpers.
+  String toBridgeJson() => jsonEncode(<String, Object?>{
+    'endpoint': endpoint,
+    'requestJson': requestJson,
+    'recoveredSigner': recoveredSigner,
+  });
 }
 
 void _requireUnsignedRange(String field, int value, int maximum) {

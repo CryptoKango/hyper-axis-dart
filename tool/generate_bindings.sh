@@ -5,7 +5,11 @@ set -euo pipefail
 readonly expected_codegen_version="2.13.0"
 readonly script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly repository_root="$(cd "${script_dir}/.." && pwd)"
-readonly rust_root="$(${script_dir}/fetch_rust_core.sh)"
+if [[ -n "${HYPER_AXIS_CORE_DEV_ROOT:-}" ]]; then
+  readonly rust_root="${HYPER_AXIS_CORE_DEV_ROOT}"
+else
+  readonly rust_root="$(${script_dir}/fetch_rust_core.sh)"
+fi
 readonly rust_crate="${rust_root}/crates/hyper-axis-ffi"
 
 if ! command -v flutter_rust_bridge_codegen >/dev/null 2>&1; then
@@ -25,6 +29,16 @@ if [[ ! -f "${rust_crate}/Cargo.toml" ]]; then
   exit 1
 fi
 
+config_file="${repository_root}/flutter_rust_bridge.yaml"
+if [[ -n "${HYPER_AXIS_CORE_DEV_ROOT:-}" ]]; then
+  config_file="$(mktemp)"
+  trap 'rm -f "${config_file}"' EXIT
+  sed \
+    -e "s|^rust_root:.*|rust_root: ${rust_crate}|" \
+    -e "s|^dart_output:.*|dart_output: ${repository_root}/lib/src/generated|" \
+    "${repository_root}/flutter_rust_bridge.yaml" > "${config_file}"
+fi
+
 cd "${repository_root}"
-flutter_rust_bridge_codegen generate --config-file flutter_rust_bridge.yaml
+flutter_rust_bridge_codegen generate --config-file "${config_file}"
 dart format lib/src/generated

@@ -1,21 +1,28 @@
 import 'dart:io';
 
 import 'package:hyper_axis/hyper_axis.dart';
+import 'package:hyper_axis/src/bridge/frb_hyper_axis_bridge.dart';
 
 Future<void> main() async {
-  final HyperAxisClient client = await HyperAxisClient.initialize();
+  final HyperAxisBridge bridge = await FrbHyperAxisBridge.initialize();
+  final bool usesDevelopmentCore =
+      Platform.environment['HYPER_AXIS_CORE_DEV_ROOT']?.isNotEmpty ?? false;
 
-  if (client.protocolVersion != hyperAxisRustProtocolVersion) {
+  if (!usesDevelopmentCore &&
+      bridge.protocolVersion != hyperAxisRustProtocolVersion) {
     throw StateError(
-      'Rust protocol ${client.protocolVersion} is incompatible with '
+      'Rust protocol ${bridge.protocolVersion} is incompatible with '
       'expected protocol $hyperAxisRustProtocolVersion.',
     );
   }
-  if (client.normalizeDecimal('001.2300') != '1.23') {
+  if (usesDevelopmentCore && bridge.protocolVersion.isEmpty) {
+    throw StateError('Development Rust protocol version is empty.');
+  }
+  if (bridge.normalizeDecimal('001.2300') != '1.23') {
     throw StateError('Rust decimal normalization returned an invalid value.');
   }
 
-  final HyperAxisPreparedOrder prepared = client.prepareLimitOrder(
+  final HyperAxisPreparedOrder prepared = bridge.prepareLimitOrder(
     HyperAxisLimitOrderRequest(
       network: HyperAxisNetwork.mainnet,
       asset: 3,
@@ -31,7 +38,7 @@ Future<void> main() async {
       '329f08729a8f946791ed6e4046ad7d94fb9be574629f1892b48baa6578abc0bc') {
     throw StateError('Rust returned an unexpected order signing digest.');
   }
-  final HyperAxisFinalizedAction finalized = client.finalizeOrder(
+  final HyperAxisFinalizedAction finalized = bridge.finalizeOrder(
     prepared: prepared,
     signature: const HyperAxisSignature(
       r: '0xc466abc93e91e15884da406ef9f37e72e924995f0661a286519e0a9e5c7ff919',
@@ -45,7 +52,45 @@ Future<void> main() async {
     throw StateError('Rust recovered an unexpected order signer.');
   }
 
-  final HyperAxisLoggingConfig applied = client.configureLogging(
+  final HyperAxisHttpRequest perpRequest = bridge.buildPerpAccountRequest(
+    network: HyperAxisNetwork.mainnet,
+    user: '0x000000000000000000000000000000000000beef',
+    dex: '',
+  );
+  if (!perpRequest.body.contains('clearinghouseState')) {
+    throw StateError('Rust returned an invalid perpetual account request.');
+  }
+  final HyperAxisPerpAccountState perpState = bridge.parsePerpAccountState(
+    '{"assetPositions":[],"crossMaintenanceMarginUsed":"0.0",'
+    '"crossMarginSummary":{"accountValue":"1","totalMarginUsed":"0",'
+    '"totalNtlPos":"0","totalRawUsd":"1"},"marginSummary":'
+    '{"accountValue":"1","totalMarginUsed":"0","totalNtlPos":"0",'
+    '"totalRawUsd":"1"},"time":1,"withdrawable":"1"}',
+  );
+  if (perpState.time != '1' || perpState.withdrawable != '1') {
+    throw StateError('Rust returned an invalid perpetual account state.');
+  }
+  final String subscription = bridge.subscribePerpAccount(
+    user: '0x000000000000000000000000000000000000beef',
+    dex: '',
+  );
+  if (!subscription.contains('clearinghouseState')) {
+    throw StateError('Rust returned an invalid account subscription.');
+  }
+
+  final HyperAxisPreparedUserAction transfer = bridge.prepareUsdClassTransfer(
+    const HyperAxisUsdClassTransferRequest(
+      network: HyperAxisNetwork.mainnet,
+      amount: '1.25',
+      toPerp: true,
+      nonce: '1234567890000',
+    ),
+  );
+  if (transfer.signingDigestHex.isEmpty) {
+    throw StateError('Rust returned an empty transfer signing digest.');
+  }
+
+  final HyperAxisLoggingConfig applied = bridge.configureLogging(
     HyperAxisLoggingConfig(
       enabled: true,
       level: HyperAxisLogLevel.info,
@@ -56,12 +101,15 @@ Future<void> main() async {
     throw StateError('Rust logging configuration was not applied.');
   }
 
-  client.clearLogs();
-  final HyperAxisLogBatch logs = client.snapshotLogs();
+  bridge.clearLogs();
+  final HyperAxisLogBatch logs = bridge.snapshotLogs();
   if (logs.dropped != '0') {
     throw StateError('Fresh diagnostic buffer has dropped records.');
   }
 
-  client.configureLogging(HyperAxisLoggingConfig());
-  stdout.writeln('HyperAxis native bridge smoke test passed.');
+  bridge.configureLogging(HyperAxisLoggingConfig());
+  stdout.writeln(
+    'HyperAxis native bridge smoke test passed '
+    '(Rust ${bridge.protocolVersion}).',
+  );
 }

@@ -2,6 +2,7 @@ import '../bridge/frb_hyper_axis_bridge.dart';
 import '../bridge/hyper_axis_bridge.dart';
 import '../error/hyper_axis_exception.dart';
 import '../logging/hyper_axis_log.dart';
+import '../models/accounts.dart';
 import '../models/orders.dart';
 import '../version.dart';
 import 'retryable_async_cache.dart';
@@ -91,6 +92,123 @@ final class HyperAxisClient {
         signature: signature,
         expectedSigner: expectedSigner,
       ),
+    );
+  }
+
+  /// Builds a perpetual account `POST /info` request.
+  HyperAxisHttpRequest buildPerpAccountRequest({
+    required HyperAxisNetwork network,
+    required String user,
+    String dex = '',
+  }) {
+    return _guard(
+      operation: 'buildPerpAccountRequest',
+      invoke: () => _bridge.buildPerpAccountRequest(
+        network: network,
+        user: user,
+        dex: dex,
+      ),
+    );
+  }
+
+  /// Builds a spot account `POST /info` request.
+  HyperAxisHttpRequest buildSpotAccountRequest({
+    required HyperAxisNetwork network,
+    required String user,
+  }) {
+    return _guard(
+      operation: 'buildSpotAccountRequest',
+      invoke: () =>
+          _bridge.buildSpotAccountRequest(network: network, user: user),
+    );
+  }
+
+  /// Validates and decodes a perpetual account response body.
+  HyperAxisPerpAccountState parsePerpAccountState(String body) {
+    return _guard(
+      operation: 'parsePerpAccountState',
+      invoke: () => _bridge.parsePerpAccountState(body),
+    );
+  }
+
+  /// Validates and decodes a spot account response body.
+  HyperAxisSpotAccountState parseSpotAccountState(String body) {
+    return _guard(
+      operation: 'parseSpotAccountState',
+      invoke: () => _bridge.parseSpotAccountState(body),
+    );
+  }
+
+  /// Returns the official account WebSocket endpoint.
+  String accountWebSocketUrl(HyperAxisNetwork network) {
+    return _guard(
+      operation: 'accountWebSocketUrl',
+      invoke: () => _bridge.accountWebSocketUrl(network),
+    );
+  }
+
+  /// Builds a perpetual-account WebSocket subscription command.
+  String subscribePerpAccount({required String user, String dex = ''}) {
+    return _guard(
+      operation: 'subscribePerpAccount',
+      invoke: () => _bridge.subscribePerpAccount(user: user, dex: dex),
+    );
+  }
+
+  /// Builds a spot-account WebSocket subscription command.
+  String subscribeSpotAccount({required String user, bool? isPortfolioMargin}) {
+    return _guard(
+      operation: 'subscribeSpotAccount',
+      invoke: () => _bridge.subscribeSpotAccount(
+        user: user,
+        isPortfolioMargin: isPortfolioMargin,
+      ),
+    );
+  }
+
+  /// Validates one inbound account WebSocket message.
+  HyperAxisAccountWebSocketMessage parseAccountWebSocketMessage(
+    String message,
+  ) {
+    return _guard(
+      operation: 'parseAccountWebSocketMessage',
+      invoke: () => _bridge.parseAccountWebSocketMessage(message),
+    );
+  }
+
+  /// Prepares a Spot/Perp USDC transfer for main-wallet signing.
+  HyperAxisPreparedUserAction prepareUsdClassTransfer(
+    HyperAxisUsdClassTransferRequest request,
+  ) {
+    return _guard(
+      operation: 'prepareUsdClassTransfer',
+      invoke: () => _bridge.prepareUsdClassTransfer(request),
+    );
+  }
+
+  /// Verifies and finalizes a prepared Spot/Perp USDC transfer.
+  HyperAxisFinalizedAction finalizeUsdClassTransfer({
+    required HyperAxisPreparedUserAction prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    return _guard(
+      operation: 'finalizeUsdClassTransfer',
+      invoke: () => _bridge.finalizeUsdClassTransfer(
+        prepared: prepared,
+        signature: signature,
+        expectedSigner: expectedSigner,
+      ),
+    );
+  }
+
+  /// Builds the canonical `POST /exchange` request for a finalized transfer.
+  HyperAxisHttpRequest buildAccountExchangeRequest(
+    HyperAxisFinalizedAction finalized,
+  ) {
+    return _guard(
+      operation: 'buildAccountExchangeRequest',
+      invoke: () => _bridge.buildAccountExchangeRequest(finalized),
     );
   }
 

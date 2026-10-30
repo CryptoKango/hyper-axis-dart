@@ -4,7 +4,11 @@ set -euo pipefail
 
 readonly script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly dart_root="$(cd "${script_dir}/.." && pwd)"
-readonly rust_root="$(${script_dir}/fetch_rust_core.sh)"
+if [[ -n "${HYPER_AXIS_CORE_DEV_ROOT:-}" ]]; then
+  readonly rust_root="${HYPER_AXIS_CORE_DEV_ROOT}"
+else
+  readonly rust_root="$(${script_dir}/fetch_rust_core.sh)"
+fi
 readonly native_directory="${rust_root}/target/release/"
 
 if [[ ! -f "${rust_root}/Cargo.toml" ]]; then
@@ -19,4 +23,5 @@ cargo build \
 
 cd "${dart_root}"
 FRB_DART_LOAD_EXTERNAL_LIBRARY_NATIVE_LIB_DIR="${native_directory}" \
+  HYPER_AXIS_CORE_DEV_ROOT="${HYPER_AXIS_CORE_DEV_ROOT:-}" \
   dart run tool/smoke_native.dart

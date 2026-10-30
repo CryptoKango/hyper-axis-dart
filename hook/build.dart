@@ -7,14 +7,14 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_rust_bridge_hooks/flutter_rust_bridge_hooks.dart';
 import 'package:path/path.dart' as path;
 
-const _coreTag = 'v0.1.0';
-const _coreCommit = 'da335740afba6f4d3ed9848efddc622072e04ab6';
+const _coreTag = 'v0.3.0';
+const _coreCommit = 'd273ded3b69c6c3eb61fb396a2a265a16ff0dfc4';
 const _sourceArchiveSha256 =
-    '4efa2335e46f2e5cba59596244961b8fc8f7a922f599cacaa75b4c3847b51334';
+    '031962cf60e3f7b37160742a1177cc5b259d8a2657d33a86a9f1a9f2497b162b';
 const _sourceArchiveUrl =
     'https://github.com/CryptoKango/hyper-axis/archive/refs/tags/'
     '$_coreTag.tar.gz';
-const _cacheMarker = '$_coreCommit:$_sourceArchiveSha256:compat-v1';
+const _cacheMarker = '$_coreCommit:$_sourceArchiveSha256:native-v2';
 const _maximumArchiveBytes = 16 * 1024 * 1024;
 
 void main(List<String> arguments) async {
@@ -79,7 +79,6 @@ final class _CoreSourceCache {
       final archiveBytes = await _downloadSourceArchive();
       _verifyArchive(archiveBytes);
       await _extractArchive(archiveBytes, coreDirectory);
-      await _applyLockedCompatibilityFix(coreDirectory);
       await _writeNativeAssetsToolchain(coreDirectory);
       await marker.writeAsString('$_cacheMarker\n', flush: true);
       return coreDirectory;
@@ -152,7 +151,7 @@ final class _CoreSourceCache {
   Future<void> _extractArchive(Uint8List bytes, Directory destination) async {
     final tarBytes = GZipDecoder().decodeBytes(bytes);
     final archive = TarDecoder().decodeBytes(tarBytes);
-    const archiveRoot = 'hyper-axis-0.1.0/';
+    const archiveRoot = 'hyper-axis-0.3.0/';
 
     for (final entry in archive) {
       if (!entry.name.startsWith(archiveRoot)) {
@@ -191,26 +190,6 @@ final class _CoreSourceCache {
     if (!await manifest.exists()) {
       throw StateError('HyperAxis Rust Core 源码归档缺少 Cargo.toml。');
     }
-  }
-
-  Future<void> _applyLockedCompatibilityFix(Directory coreDirectory) async {
-    final lockFile = File(path.join(coreDirectory.path, 'Cargo.lock'));
-    final original = await lockFile.readAsString();
-    const incompatible = '''name = "libc"
-version = "0.2.190"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"''';
-    const compatible = '''name = "libc"
-version = "0.2.189"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"''';
-    if (!original.contains(incompatible)) {
-      throw StateError('Rust Core Cargo.lock 不符合 $_coreCommit 的预期内容。');
-    }
-    await lockFile.writeAsString(
-      original.replaceFirst(incompatible, compatible),
-      flush: true,
-    );
   }
 
   Future<void> _writeNativeAssetsToolchain(Directory coreDirectory) async {

@@ -1,3 +1,10 @@
+## 0.3.0 - 2026-10-30
+
+- 新增合约与现货账户查询、严格响应模型及 WebSocket 实时订阅。
+- 新增 Spot/Perp USDC 划转的准备、外部签名验证和 exchange 请求构建。
+- 增加递归只读的账户 WebSocket 数据、完整测试和 Native bridge 烟测。
+- Rust Core 固定升级至 v0.3.0，并校验 commit 与源码归档 SHA256。
+
 ## 0.1.0
 
 - 初始化严格的 Dart/Flutter SDK 工程结构。

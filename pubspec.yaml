@@ -1,6 +1,6 @@
 name: hyper_axis
 description: Dart and Flutter SDK for the HyperAxis Rust core.
-version: 0.1.0
+version: 0.3.0
 publish_to: none
 homepage: https://github.com/CryptoKango/hyper-axis-dart
 repository: https://github.com/CryptoKango/hyper-axis-dart

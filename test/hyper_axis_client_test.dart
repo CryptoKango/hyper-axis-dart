@@ -7,7 +7,7 @@ void main() {
       final _FakeBridge bridge = _FakeBridge();
       final HyperAxisClient client = HyperAxisClient.withBridge(bridge);
 
-      expect(client.protocolVersion, '0.1.0');
+      expect(client.protocolVersion, '0.3.0');
       expect(client.normalizeDecimal('001.2300'), '1.23');
 
       final HyperAxisLoggingConfig applied = client.configureLogging(
@@ -109,6 +109,58 @@ void main() {
       expect(prepared.signingDigestHex, 'digest');
       expect(finalized.endpoint, 'https://example.test/exchange');
     });
+
+    test('delegates account queries, subscriptions, and transfers', () {
+      final HyperAxisClient client = HyperAxisClient.withBridge(_FakeBridge());
+
+      final HyperAxisHttpRequest perpRequest = client.buildPerpAccountRequest(
+        network: HyperAxisNetwork.mainnet,
+        user: _FakeBridge.user,
+      );
+      final HyperAxisHttpRequest spotRequest = client.buildSpotAccountRequest(
+        network: HyperAxisNetwork.testnet,
+        user: _FakeBridge.user,
+      );
+      final HyperAxisPerpAccountState perp = client.parsePerpAccountState('{}');
+      final HyperAxisSpotAccountState spot = client.parseSpotAccountState('{}');
+      final HyperAxisPreparedUserAction prepared = client
+          .prepareUsdClassTransfer(
+            const HyperAxisUsdClassTransferRequest(
+              network: HyperAxisNetwork.mainnet,
+              amount: '1.25',
+              toPerp: true,
+              nonce: '1234567890000',
+            ),
+          );
+      final HyperAxisFinalizedAction finalized = client
+          .finalizeUsdClassTransfer(
+            prepared: prepared,
+            signature: const HyperAxisSignature(r: '0x01', s: '0x02', v: 27),
+            expectedSigner: _FakeBridge.user,
+          );
+
+      expect(perpRequest.body, contains('clearinghouseState'));
+      expect(spotRequest.body, contains('spotClearinghouseState'));
+      expect(perp.withdrawable, '10');
+      expect(spot.balances.single.coin, 'USDC');
+      expect(
+        client.accountWebSocketUrl(HyperAxisNetwork.mainnet),
+        'wss://example.test/ws',
+      );
+      expect(
+        client.subscribePerpAccount(user: _FakeBridge.user),
+        contains('clearinghouseState'),
+      );
+      expect(
+        client.subscribeSpotAccount(user: _FakeBridge.user),
+        contains('spotState'),
+      );
+      expect(prepared.signingDigestHex, 'transfer-digest');
+      expect(
+        client.buildAccountExchangeRequest(finalized).kind,
+        'signedAction',
+      );
+    });
   });
 
   group('logging models', () {
@@ -152,7 +204,9 @@ void main() {
 }
 
 final class _FakeBridge implements HyperAxisBridge {
-  _FakeBridge({this.protocolVersion = '0.1.0'});
+  _FakeBridge({this.protocolVersion = '0.3.0'});
+
+  static const String user = '0x0000000000000000000000000000000000000001';
 
   @override
   final String protocolVersion;
@@ -169,6 +223,52 @@ final class _FakeBridge implements HyperAxisBridge {
   HyperAxisLogBatch drainLogs() => snapshotLogs();
 
   @override
+  String accountWebSocketUrl(HyperAxisNetwork network) =>
+      'wss://example.test/ws';
+
+  @override
+  HyperAxisHttpRequest buildAccountExchangeRequest(
+    HyperAxisFinalizedAction finalized,
+  ) {
+    return HyperAxisHttpRequest(
+      kind: 'signedAction',
+      method: 'POST',
+      url: finalized.endpoint,
+      headers: const <String, String>{'content-type': 'application/json'},
+      body: finalized.requestJson,
+    );
+  }
+
+  @override
+  HyperAxisHttpRequest buildPerpAccountRequest({
+    required HyperAxisNetwork network,
+    required String user,
+    required String dex,
+  }) {
+    return HyperAxisHttpRequest(
+      kind: 'info',
+      method: 'POST',
+      url: 'https://example.test/info',
+      headers: const <String, String>{'content-type': 'application/json'},
+      body: '{"type":"clearinghouseState"}',
+    );
+  }
+
+  @override
+  HyperAxisHttpRequest buildSpotAccountRequest({
+    required HyperAxisNetwork network,
+    required String user,
+  }) {
+    return HyperAxisHttpRequest(
+      kind: 'info',
+      method: 'POST',
+      url: 'https://example.test/info',
+      headers: const <String, String>{'content-type': 'application/json'},
+      body: '{"type":"spotClearinghouseState"}',
+    );
+  }
+
+  @override
   HyperAxisFinalizedAction finalizeOrder({
     required HyperAxisPreparedOrder prepared,
     required HyperAxisSignature signature,
@@ -177,6 +277,19 @@ final class _FakeBridge implements HyperAxisBridge {
     return HyperAxisFinalizedAction(
       endpoint: 'https://example.test/exchange',
       requestJson: '{}',
+      recoveredSigner: expectedSigner,
+    );
+  }
+
+  @override
+  HyperAxisFinalizedAction finalizeUsdClassTransfer({
+    required HyperAxisPreparedUserAction prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    return HyperAxisFinalizedAction(
+      endpoint: 'https://example.test/exchange',
+      requestJson: '{"action":{"type":"usdClassTransfer"}}',
       recoveredSigner: expectedSigner,
     );
   }
@@ -200,9 +313,76 @@ final class _FakeBridge implements HyperAxisBridge {
   }
 
   @override
+  HyperAxisPreparedUserAction prepareUsdClassTransfer(
+    HyperAxisUsdClassTransferRequest request,
+  ) {
+    return const HyperAxisPreparedUserAction(
+      network: HyperAxisNetwork.mainnet,
+      nonce: '1234567890000',
+      actionJson: '{"type":"usdClassTransfer"}',
+      signingDigestHex: 'transfer-digest',
+      bridgeJson: '{}',
+    );
+  }
+
+  @override
+  HyperAxisPerpAccountState parsePerpAccountState(String body) {
+    const HyperAxisPerpMarginSummary summary = HyperAxisPerpMarginSummary(
+      accountValue: '10',
+      totalMarginUsed: '0',
+      totalNtlPos: '0',
+      totalRawUsd: '10',
+    );
+    return HyperAxisPerpAccountState(
+      assetPositions: <HyperAxisPerpAssetPosition>[],
+      crossMaintenanceMarginUsed: '0',
+      crossMarginSummary: summary,
+      marginSummary: summary,
+      time: '1234567890000',
+      withdrawable: '10',
+    );
+  }
+
+  @override
+  HyperAxisSpotAccountState parseSpotAccountState(String body) {
+    return HyperAxisSpotAccountState(
+      balances: const <HyperAxisSpotBalance>[
+        HyperAxisSpotBalance(
+          coin: 'USDC',
+          token: 0,
+          hold: '0',
+          total: '10',
+          entryNotional: '0',
+        ),
+      ],
+    );
+  }
+
+  @override
+  HyperAxisAccountWebSocketMessage parseAccountWebSocketMessage(
+    String message,
+  ) {
+    return HyperAxisAccountWebSocketMessage(
+      channel: 'spotState',
+      data: const <String, Object?>{},
+      canonicalJson: '{"channel":"spotState","data":{}}',
+    );
+  }
+
+  @override
   HyperAxisLogBatch snapshotLogs() {
     return HyperAxisLogBatch(dropped: '0', records: <HyperAxisLogRecord>[]);
   }
+
+  @override
+  String subscribePerpAccount({required String user, required String dex}) =>
+      '{"method":"subscribe","subscription":{"type":"clearinghouseState"}}';
+
+  @override
+  String subscribeSpotAccount({
+    required String user,
+    bool? isPortfolioMargin,
+  }) => '{"method":"subscribe","subscription":{"type":"spotState"}}';
 }
 
 final class _ThrowingBridge implements HyperAxisBridge {
@@ -222,7 +402,28 @@ final class _ThrowingBridge implements HyperAxisBridge {
   }
 
   @override
-  String get protocolVersion => '0.1.0';
+  String get protocolVersion => '0.3.0';
+
+  @override
+  String accountWebSocketUrl(HyperAxisNetwork network) => _fail();
+
+  @override
+  HyperAxisHttpRequest buildAccountExchangeRequest(
+    HyperAxisFinalizedAction finalized,
+  ) => _fail();
+
+  @override
+  HyperAxisHttpRequest buildPerpAccountRequest({
+    required HyperAxisNetwork network,
+    required String user,
+    required String dex,
+  }) => _fail();
+
+  @override
+  HyperAxisHttpRequest buildSpotAccountRequest({
+    required HyperAxisNetwork network,
+    required String user,
+  }) => _fail();
 
   @override
   void clearLogs() => _fail();
@@ -243,6 +444,13 @@ final class _ThrowingBridge implements HyperAxisBridge {
   }) => _fail();
 
   @override
+  HyperAxisFinalizedAction finalizeUsdClassTransfer({
+    required HyperAxisPreparedUserAction prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) => _fail();
+
+  @override
   String normalizeDecimal(String value) => _fail();
 
   @override
@@ -251,5 +459,31 @@ final class _ThrowingBridge implements HyperAxisBridge {
   }
 
   @override
+  HyperAxisPreparedUserAction prepareUsdClassTransfer(
+    HyperAxisUsdClassTransferRequest request,
+  ) => _fail();
+
+  @override
+  HyperAxisPerpAccountState parsePerpAccountState(String body) => _fail();
+
+  @override
+  HyperAxisSpotAccountState parseSpotAccountState(String body) => _fail();
+
+  @override
+  HyperAxisAccountWebSocketMessage parseAccountWebSocketMessage(
+    String message,
+  ) => _fail();
+
+  @override
   HyperAxisLogBatch snapshotLogs() => _fail();
+
+  @override
+  String subscribePerpAccount({required String user, required String dex}) =>
+      _fail();
+
+  @override
+  String subscribeSpotAccount({
+    required String user,
+    bool? isPortfolioMargin,
+  }) => _fail();
 }

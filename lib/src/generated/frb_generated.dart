@@ -3,6 +3,7 @@
 
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
+import 'api/accounts.dart';
 import 'api/orders.dart';
 import 'api/runtime.dart';
 import 'dart:async';
@@ -73,7 +74,7 @@ class HyperAxisRustLib
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => -1281813416;
+  int get rustContentHash => -242194821;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -86,6 +87,23 @@ class HyperAxisRustLib
 }
 
 abstract class HyperAxisRustLibApi extends BaseApi {
+  String crateApiAccountsAccountWebsocketUrl({required String network});
+
+  String crateApiAccountsBuildAccountExchangeRequestJson({
+    required String finalizedJson,
+  });
+
+  String crateApiAccountsBuildPerpAccountRequestJson({
+    required String network,
+    required String user,
+    required String dex,
+  });
+
+  String crateApiAccountsBuildSpotAccountRequestJson({
+    required String network,
+    required String user,
+  });
+
   void crateApiRuntimeClearLogs();
 
   String crateApiRuntimeConfigureLoggingJson({
@@ -104,15 +122,45 @@ abstract class HyperAxisRustLibApi extends BaseApi {
     required String expectedSigner,
   });
 
+  String crateApiAccountsFinalizeUsdClassTransferJson({
+    required String preparedJson,
+    required String r,
+    required String s,
+    required int v,
+    required String expectedSigner,
+  });
+
   Future<void> crateApiRuntimeInitializeBridge();
 
   String crateApiRuntimeNormalizeDecimal({required String value});
 
+  String crateApiAccountsParseAccountWebsocketMessageJson({
+    required String message,
+  });
+
+  String crateApiAccountsParsePerpAccountStateJson({required String body});
+
+  String crateApiAccountsParseSpotAccountStateJson({required String body});
+
   String crateApiOrdersPrepareLimitOrderJson({required String requestJson});
+
+  String crateApiAccountsPrepareUsdClassTransferJson({
+    required String requestJson,
+  });
 
   String crateApiRuntimeProtocolVersion();
 
   String crateApiRuntimeSnapshotLogsJson();
+
+  String crateApiAccountsSubscribePerpAccountJson({
+    required String user,
+    required String dex,
+  });
+
+  String crateApiAccountsSubscribeSpotAccountJson({
+    required String user,
+    bool? isPortfolioMargin,
+  });
 }
 
 class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
@@ -125,12 +173,128 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
   });
 
   @override
+  String crateApiAccountsAccountWebsocketUrl({required String network}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(network, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiAccountsAccountWebsocketUrlConstMeta,
+        argValues: [network],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAccountsAccountWebsocketUrlConstMeta =>
+      const TaskConstMeta(
+        debugName: "account_websocket_url",
+        argNames: ["network"],
+      );
+
+  @override
+  String crateApiAccountsBuildAccountExchangeRequestJson({
+    required String finalizedJson,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(finalizedJson, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiAccountsBuildAccountExchangeRequestJsonConstMeta,
+        argValues: [finalizedJson],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAccountsBuildAccountExchangeRequestJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "build_account_exchange_request_json",
+        argNames: ["finalizedJson"],
+      );
+
+  @override
+  String crateApiAccountsBuildPerpAccountRequestJson({
+    required String network,
+    required String user,
+    required String dex,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(network, serializer);
+          sse_encode_String(user, serializer);
+          sse_encode_String(dex, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiAccountsBuildPerpAccountRequestJsonConstMeta,
+        argValues: [network, user, dex],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAccountsBuildPerpAccountRequestJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "build_perp_account_request_json",
+        argNames: ["network", "user", "dex"],
+      );
+
+  @override
+  String crateApiAccountsBuildSpotAccountRequestJson({
+    required String network,
+    required String user,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(network, serializer);
+          sse_encode_String(user, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiAccountsBuildSpotAccountRequestJsonConstMeta,
+        argValues: [network, user],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAccountsBuildSpotAccountRequestJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "build_spot_account_request_json",
+        argNames: ["network", "user"],
+      );
+
+  @override
   void crateApiRuntimeClearLogs() {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -159,7 +323,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
           sse_encode_bool(enabled, serializer);
           sse_encode_String(level, serializer);
           sse_encode_u_32(capacity, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -184,7 +348,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 7)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -217,7 +381,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
           sse_encode_String(s, serializer);
           sse_encode_u_8(v, serializer);
           sse_encode_String(expectedSigner, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -237,6 +401,42 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
       );
 
   @override
+  String crateApiAccountsFinalizeUsdClassTransferJson({
+    required String preparedJson,
+    required String r,
+    required String s,
+    required int v,
+    required String expectedSigner,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(preparedJson, serializer);
+          sse_encode_String(r, serializer);
+          sse_encode_String(s, serializer);
+          sse_encode_u_8(v, serializer);
+          sse_encode_String(expectedSigner, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiAccountsFinalizeUsdClassTransferJsonConstMeta,
+        argValues: [preparedJson, r, s, v, expectedSigner],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAccountsFinalizeUsdClassTransferJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "finalize_usd_class_transfer_json",
+        argNames: ["preparedJson", "r", "s", "v", "expectedSigner"],
+      );
+
+  @override
   Future<void> crateApiRuntimeInitializeBridge() {
     return handler.executeNormal(
       NormalTask(
@@ -245,7 +445,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 10,
             port: port_,
           );
         },
@@ -270,7 +470,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(value, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 11)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -287,13 +487,94 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
       const TaskConstMeta(debugName: "normalize_decimal", argNames: ["value"]);
 
   @override
+  String crateApiAccountsParseAccountWebsocketMessageJson({
+    required String message,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(message, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 12)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiAccountsParseAccountWebsocketMessageJsonConstMeta,
+        argValues: [message],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiAccountsParseAccountWebsocketMessageJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "parse_account_websocket_message_json",
+        argNames: ["message"],
+      );
+
+  @override
+  String crateApiAccountsParsePerpAccountStateJson({required String body}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(body, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 13)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiAccountsParsePerpAccountStateJsonConstMeta,
+        argValues: [body],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAccountsParsePerpAccountStateJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "parse_perp_account_state_json",
+        argNames: ["body"],
+      );
+
+  @override
+  String crateApiAccountsParseSpotAccountStateJson({required String body}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(body, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 14)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiAccountsParseSpotAccountStateJsonConstMeta,
+        argValues: [body],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAccountsParseSpotAccountStateJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "parse_spot_account_state_json",
+        argNames: ["body"],
+      );
+
+  @override
   String crateApiOrdersPrepareLimitOrderJson({required String requestJson}) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(requestJson, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 7)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 15)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -313,12 +594,40 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
       );
 
   @override
+  String crateApiAccountsPrepareUsdClassTransferJson({
+    required String requestJson,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(requestJson, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 16)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiAccountsPrepareUsdClassTransferJsonConstMeta,
+        argValues: [requestJson],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAccountsPrepareUsdClassTransferJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "prepare_usd_class_transfer_json",
+        argNames: ["requestJson"],
+      );
+
+  @override
   String crateApiRuntimeProtocolVersion() {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 17)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -340,7 +649,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 18)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -356,6 +665,66 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
   TaskConstMeta get kCrateApiRuntimeSnapshotLogsJsonConstMeta =>
       const TaskConstMeta(debugName: "snapshot_logs_json", argNames: []);
 
+  @override
+  String crateApiAccountsSubscribePerpAccountJson({
+    required String user,
+    required String dex,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(user, serializer);
+          sse_encode_String(dex, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 19)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiAccountsSubscribePerpAccountJsonConstMeta,
+        argValues: [user, dex],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAccountsSubscribePerpAccountJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "subscribe_perp_account_json",
+        argNames: ["user", "dex"],
+      );
+
+  @override
+  String crateApiAccountsSubscribeSpotAccountJson({
+    required String user,
+    bool? isPortfolioMargin,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(user, serializer);
+          sse_encode_opt_box_autoadd_bool(isPortfolioMargin, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 20)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiAccountsSubscribeSpotAccountJsonConstMeta,
+        argValues: [user, isPortfolioMargin],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAccountsSubscribeSpotAccountJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "subscribe_spot_account_json",
+        argNames: ["user", "isPortfolioMargin"],
+      );
+
   @protected
   String dco_decode_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -369,9 +738,21 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
   }
 
   @protected
+  bool dco_decode_box_autoadd_bool(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as bool;
+  }
+
+  @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint8List;
+  }
+
+  @protected
+  bool? dco_decode_opt_box_autoadd_bool(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_bool(raw);
   }
 
   @protected
@@ -406,10 +787,27 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
   }
 
   @protected
+  bool sse_decode_box_autoadd_bool(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_bool(deserializer));
+  }
+
+  @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var len_ = sse_decode_i_32(deserializer);
     return deserializer.buffer.getUint8List(len_);
+  }
+
+  @protected
+  bool? sse_decode_opt_box_autoadd_bool(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_bool(deserializer));
+    } else {
+      return null;
+    }
   }
 
   @protected
@@ -448,6 +846,12 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
   }
 
   @protected
+  void sse_encode_box_autoadd_bool(bool self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_bool(self, serializer);
+  }
+
+  @protected
   void sse_encode_list_prim_u_8_strict(
     Uint8List self,
     SseSerializer serializer,
@@ -455,6 +859,16 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_bool(bool? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_bool(self, serializer);
+    }
   }
 
   @protected

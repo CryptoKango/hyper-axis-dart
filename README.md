@@ -5,10 +5,10 @@ HyperAxis Rust Core 的 Dart/Flutter SDK。该仓库负责稳定的 Dart API、N
 
 ## 当前状态
 
-仓库已完成第一阶段 Native bridge 接入：公共 API 门面、bridge 隔离接口、强类型错误、
-日志模型、严格 JSON 解码、FRB 生成代码、测试和 CI。当前 ABI 已覆盖运行时版本、精度
-规范化、脱敏日志，以及限价单的准备、外部签名验证和 exchange 请求生成。Flutter 平台仅
-支持 Android 与 iOS；Web 由 `hyper-axis-ts` 独立交付。
+仓库已完成 Native bridge 接入：公共 API 门面、bridge 隔离接口、强类型错误、日志模型、
+严格 JSON 解码、FRB 生成代码、测试和 CI。当前 ABI 覆盖运行时版本、精度规范化、脱敏
+日志、限价单准备与外部签名验证，以及合约/现货账户查询、实时账户订阅和 Spot/Perp USDC
+划转。Flutter 平台仅支持 Android 与 iOS；Web 由 `hyper-axis-ts` 独立交付。
 
 ## 架构
 
@@ -24,6 +24,56 @@ App
 - 金额、价格、数量、费率、nonce 和时间戳在跨语言边界均使用十进制字符串。
 - SDK 不接触私钥；签名由 App、硬件钱包或系统安全模块完成。
 - 日志默认关闭，并且只接收 Rust Core 已脱敏的结构化记录。
+
+## 账户 API
+
+SDK 只负责构造官方请求、验证响应与生成待签名摘要；HTTP/WebSocket 连接和主钱包签名由
+宿主应用负责。合约账户使用 `clearinghouseState`，现货账户使用
+`spotClearinghouseState`：
+
+```dart
+final client = await HyperAxisClient.initialize();
+final address = '0x000000000000000000000000000000000000beef';
+
+final perpRequest = client.buildPerpAccountRequest(
+  network: HyperAxisNetwork.mainnet,
+  user: address,
+);
+final spotRequest = client.buildSpotAccountRequest(
+  network: HyperAxisNetwork.mainnet,
+  user: address,
+);
+
+// 宿主通过 HTTP POST 发送 request.body，再把原始响应交回 Rust 校验。
+final perpState = client.parsePerpAccountState(perpResponseBody);
+final spotState = client.parseSpotAccountState(spotResponseBody);
+
+// 宿主连接该 URL，并发送返回的订阅 JSON；断线重连由宿主负责。
+final wsUrl = client.accountWebSocketUrl(HyperAxisNetwork.mainnet);
+final perpSubscription = client.subscribePerpAccount(user: address);
+final spotSubscription = client.subscribeSpotAccount(user: address);
+```
+
+USDC 账户划转不会接触私钥。宿主使用主钱包签署
+`prepared.signingDigestHex`，再调用 finalize 生成可提交的 `/exchange` 请求：
+
+```dart
+final prepared = client.prepareUsdClassTransfer(
+  const HyperAxisUsdClassTransferRequest(
+    network: HyperAxisNetwork.mainnet,
+    amount: '1.25',
+    toPerp: true, // Spot -> Perp；false 表示 Perp -> Spot
+    nonce: '1730000000000',
+  ),
+);
+
+final finalized = client.finalizeUsdClassTransfer(
+  prepared: prepared,
+  signature: walletSignature,
+  expectedSigner: address,
+);
+final exchangeRequest = client.buildAccountExchangeRequest(finalized);
+```
 
 ## 开发
 
@@ -42,6 +92,16 @@ Git tag 和 commit 从 GitHub 拉取并校验 Rust Core，不依赖本机相邻�
 ./tool/generate_bindings.sh
 ```
 
+Rust Core 尚未发布的新 API 只能在本地联调，不得写入正式依赖。使用显式开发覆盖：
+
+```bash
+HYPER_AXIS_CORE_DEV_ROOT=/absolute/path/to/hyper-axis ./tool/generate_bindings.sh
+HYPER_AXIS_CORE_DEV_ROOT=/absolute/path/to/hyper-axis ./tool/run_native_smoke.sh
+```
+
+开发覆盖不会修改正式 tag/commit 固定项；发版时仍必须先发布 Rust Core，再同步版本、commit
+和源码归档 SHA256。
+
 本仓库只交付 Android 与 iOS，不生成 Web 绑定；Web SDK 由 `hyper-axis-ts` 通过 WASM
 独立交付。开发态由脚本构建已锁定的 Rust workspace 动态库，并通过 FRB 官方加载目录
 变量执行真实桥接验证：
@@ -57,7 +117,7 @@ dependencies:
   hyper_axis:
     git:
       url: https://github.com/CryptoKango/hyper-axis-dart.git
-      ref: v0.1.0
+      ref: v0.3.0
 ```
 
 宿主工程最低版本为 Android API 24、iOS 13。Flutter 的 Native Assets hook 会自动下载
