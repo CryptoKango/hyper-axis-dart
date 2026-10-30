@@ -152,10 +152,10 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: c46adce407e1b074d001b483fa6bf76b82a00474
+      resolved-ref: c7d0e37d15effc766464cd81919814cc1239c7c6
       url: "https://github.com/CryptoKango/hyper-axis-dart.git"
     source: git
-    version: "0.1.0"
+    version: "0.3.0"
   leak_tracker:
     dependency: transitive
     description:
