@@ -77,13 +77,14 @@ class HyperAxisRustLib
   @override
   int get rustContentHash => 941349784;
 
-  static const kDefaultExternalLibraryLoaderConfig = ExternalLibraryLoaderConfig(
-    stem: 'hyper_axis_ffi',
-    ioDirectory:
-        '../../../../private/tmp/hyper-axis-bindings-core/crates/hyper-axis-ffi/target/release/',
-    webPrefix: 'pkg/',
-    wasmBindgenName: 'wasm_bindgen',
-  );
+  static const kDefaultExternalLibraryLoaderConfig =
+      ExternalLibraryLoaderConfig(
+        stem: 'hyper_axis_ffi',
+        ioDirectory:
+            '.dart_tool/hyper-axis-core/crates/hyper-axis-ffi/target/release/',
+        webPrefix: 'pkg/',
+        wasmBindgenName: 'wasm_bindgen',
+      );
 }
 
 abstract class HyperAxisRustLibApi extends BaseApi {

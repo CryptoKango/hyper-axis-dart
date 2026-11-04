@@ -138,7 +138,7 @@ dependencies:
   hyper_axis:
     git:
       url: https://github.com/CryptoKango/hyper-axis-dart.git
-      ref: v0.3.0
+      ref: v0.3.1
 ```
 
 宿主工程最低版本为 Android API 24、iOS 13。Flutter 的 Native Assets hook 会自动下载

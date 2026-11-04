@@ -6,7 +6,9 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-/// Prepares one update-leverage action without handling private keys.
+/// Validates a cross/isolated leverage update and returns its opaque artifact.
+///
+/// # Errors
 ///
 /// Returns a sanitized protocol or JSON error.
 String prepareUpdateLeverageJson({required String requestJson}) =>
@@ -14,11 +16,11 @@ String prepareUpdateLeverageJson({required String requestJson}) =>
       requestJson: requestJson,
     );
 
-/// Finalizes one prepared update-leverage action after external signing.
+/// Revalidates and finalizes a leverage update after external signing.
 ///
-/// Rust revalidates the prepared artifact, verifies the recovered signer, and
-/// returns the canonical exchange request. Private keys never cross the FFI
-/// boundary.
+/// # Errors
+///
+/// Returns a sanitized JSON, signature, signer, or artifact-integrity error.
 String finalizeUpdateLeverageJson({
   required String preparedJson,
   required String r,
