@@ -49,4 +49,21 @@ void main() {
       ),
     );
   });
+
+  test('cancel request preserves OID and nonce as exact strings', () {
+    final HyperAxisCancelRequest request = HyperAxisCancelRequest(
+      network: HyperAxisNetwork.mainnet,
+      cancels: const <HyperAxisCancelOrder>[
+        HyperAxisCancelOrder(asset: 3, orderId: '18446744073709551615'),
+      ],
+      nonce: '18446744073709551615',
+    );
+    final Map<String, Object?> object =
+        jsonDecode(request.toBridgeJson())! as Map<String, Object?>;
+    final List<Object?> cancels = object['cancels']! as List<Object?>;
+    final Map<String, Object?> cancel = cancels.single! as Map<String, Object?>;
+
+    expect(cancel['oid'], '18446744073709551615');
+    expect(object['nonce'], '18446744073709551615');
+  });
 }

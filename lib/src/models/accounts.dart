@@ -281,6 +281,37 @@ final class HyperAxisUsdClassTransferRequest {
   });
 }
 
+/// Exact input for withdrawing USDC from Hyperliquid to an EVM address.
+final class HyperAxisWithdrawRequest {
+  /// Creates a withdrawal request without handling private keys.
+  const HyperAxisWithdrawRequest({
+    required this.network,
+    required this.destination,
+    required this.amount,
+    required this.nonce,
+  });
+
+  /// Target environment.
+  final HyperAxisNetwork network;
+
+  /// Destination EVM address.
+  final String destination;
+
+  /// Positive exact USDC amount.
+  final String amount;
+
+  /// Millisecond nonce encoded as an unsigned decimal string.
+  final String nonce;
+
+  /// Encodes the exact Rust request schema.
+  String toBridgeJson() => jsonEncode(<String, Object?>{
+    'network': network.wireName,
+    'destination': destination,
+    'amount': amount,
+    'nonce': nonce,
+  });
+}
+
 /// Opaque Rust-validated user action awaiting a main-wallet signature.
 final class HyperAxisPreparedUserAction {
   /// Creates a decoded prepared user action.

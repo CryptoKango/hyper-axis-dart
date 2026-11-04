@@ -24,6 +24,16 @@ abstract interface class HyperAxisBridge {
     required String expectedSigner,
   });
 
+  /// Validates and prepares one or more order cancellations.
+  HyperAxisPreparedOrder prepareCancel(HyperAxisCancelRequest request);
+
+  /// Verifies the signature and builds the exact cancel request.
+  HyperAxisFinalizedAction finalizeCancel({
+    required HyperAxisPreparedOrder prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  });
+
   /// Validates and prepares one leverage update for platform signing.
   HyperAxisPreparedLeverageUpdate prepareUpdateLeverage(
     HyperAxisUpdateLeverageRequest request,
@@ -74,6 +84,16 @@ abstract interface class HyperAxisBridge {
 
   /// Verifies and finalizes a Spot/Perp USDC transfer.
   HyperAxisFinalizedAction finalizeUsdClassTransfer({
+    required HyperAxisPreparedUserAction prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  });
+
+  /// Prepares a bridge withdrawal.
+  HyperAxisPreparedUserAction prepareWithdraw(HyperAxisWithdrawRequest request);
+
+  /// Verifies and finalizes a bridge withdrawal.
+  HyperAxisFinalizedAction finalizeWithdraw({
     required HyperAxisPreparedUserAction prepared,
     required HyperAxisSignature signature,
     required String expectedSigner,

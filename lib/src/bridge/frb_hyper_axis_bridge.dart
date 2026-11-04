@@ -86,6 +86,37 @@ final class FrbHyperAxisBridge implements HyperAxisBridge {
   }
 
   @override
+  HyperAxisPreparedOrder prepareCancel(HyperAxisCancelRequest request) {
+    final String json = _invoke(
+      operation: 'prepareCancel',
+      errorCode: HyperAxisErrorCode.protocol,
+      invoke: () =>
+          native_orders.prepareCancelJson(requestJson: request.toBridgeJson()),
+    );
+    return HyperAxisBridgeCodec.decodePreparedOrder(json);
+  }
+
+  @override
+  HyperAxisFinalizedAction finalizeCancel({
+    required HyperAxisPreparedOrder prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    final String json = _invoke(
+      operation: 'finalizeCancel',
+      errorCode: HyperAxisErrorCode.signing,
+      invoke: () => native_orders.finalizeCancelJson(
+        preparedJson: prepared.bridgeJson,
+        r: signature.r,
+        s: signature.s,
+        v: signature.v,
+        expectedSigner: expectedSigner,
+      ),
+    );
+    return HyperAxisBridgeCodec.decodeFinalizedAction(json);
+  }
+
+  @override
   HyperAxisPreparedLeverageUpdate prepareUpdateLeverage(
     HyperAxisUpdateLeverageRequest request,
   ) {
@@ -242,6 +273,40 @@ final class FrbHyperAxisBridge implements HyperAxisBridge {
       operation: 'finalizeUsdClassTransfer',
       errorCode: HyperAxisErrorCode.signing,
       invoke: () => native_accounts.finalizeUsdClassTransferJson(
+        preparedJson: prepared.bridgeJson,
+        r: signature.r,
+        s: signature.s,
+        v: signature.v,
+        expectedSigner: expectedSigner,
+      ),
+    );
+    return HyperAxisBridgeCodec.decodeFinalizedAction(json);
+  }
+
+  @override
+  HyperAxisPreparedUserAction prepareWithdraw(
+    HyperAxisWithdrawRequest request,
+  ) {
+    final String json = _invoke(
+      operation: 'prepareWithdraw',
+      errorCode: HyperAxisErrorCode.protocol,
+      invoke: () => native_accounts.prepareWithdrawJson(
+        requestJson: request.toBridgeJson(),
+      ),
+    );
+    return HyperAxisAccountBridgeCodec.decodePreparedUserAction(json);
+  }
+
+  @override
+  HyperAxisFinalizedAction finalizeWithdraw({
+    required HyperAxisPreparedUserAction prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    final String json = _invoke(
+      operation: 'finalizeWithdraw',
+      errorCode: HyperAxisErrorCode.signing,
+      invoke: () => native_accounts.finalizeWithdrawJson(
         preparedJson: prepared.bridgeJson,
         r: signature.r,
         s: signature.s,

@@ -129,6 +129,35 @@ String finalizeUsdClassTransferJson({
       expectedSigner: expectedSigner,
     );
 
+/// Prepares a Hyperliquid bridge withdrawal for main-wallet signing.
+///
+/// # Errors
+///
+/// Returns an error for malformed JSON, invalid amounts, addresses, or nonces.
+String prepareWithdrawJson({required String requestJson}) => HyperAxisRustLib
+    .instance
+    .api
+    .crateApiAccountsPrepareWithdrawJson(requestJson: requestJson);
+
+/// Verifies and finalizes a prepared Hyperliquid bridge withdrawal.
+///
+/// # Errors
+///
+/// Returns an error for modified artifacts, invalid signatures, or signer mismatch.
+String finalizeWithdrawJson({
+  required String preparedJson,
+  required String r,
+  required String s,
+  required int v,
+  required String expectedSigner,
+}) => HyperAxisRustLib.instance.api.crateApiAccountsFinalizeWithdrawJson(
+  preparedJson: preparedJson,
+  r: r,
+  s: s,
+  v: v,
+  expectedSigner: expectedSigner,
+);
+
 /// Builds a canonical exchange HTTP request from a finalized transfer.
 ///
 /// # Errors

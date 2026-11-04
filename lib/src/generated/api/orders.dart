@@ -38,3 +38,33 @@ String finalizeOrderJson({
   v: v,
   expectedSigner: expectedSigner,
 );
+
+/// Validates a cancellation-by-OID request and returns the opaque prepared artifact.
+///
+/// # Errors
+///
+/// Returns a sanitized protocol or JSON error.
+String prepareCancelJson({required String requestJson}) => HyperAxisRustLib
+    .instance
+    .api
+    .crateApiOrdersPrepareCancelJson(requestJson: requestJson);
+
+/// Revalidates a prepared cancellation, verifies its signature, and returns the
+/// exact exchange request artifact.
+///
+/// # Errors
+///
+/// Returns a sanitized JSON, signature, signer, or artifact-integrity error.
+String finalizeCancelJson({
+  required String preparedJson,
+  required String r,
+  required String s,
+  required int v,
+  required String expectedSigner,
+}) => HyperAxisRustLib.instance.api.crateApiOrdersFinalizeCancelJson(
+  preparedJson: preparedJson,
+  r: r,
+  s: s,
+  v: v,
+  expectedSigner: expectedSigner,
+);

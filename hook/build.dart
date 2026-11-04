@@ -55,6 +55,18 @@ final class _CoreSourceCache {
   final Uri sharedOutputDirectory;
 
   Future<Directory> prepare() async {
+    final developmentRoot = Platform.environment['HYPER_AXIS_CORE_DEV_ROOT'];
+    if (developmentRoot != null && developmentRoot.trim().isNotEmpty) {
+      final directory = Directory(developmentRoot.trim());
+      final manifest = File(path.join(directory.path, 'Cargo.toml'));
+      if (!await manifest.exists()) {
+        throw StateError(
+          'HYPER_AXIS_CORE_DEV_ROOT does not contain Cargo.toml: '
+          '${directory.path}',
+        );
+      }
+      return directory;
+    }
     final cacheRoot = Directory.fromUri(sharedOutputDirectory);
     final coreDirectory = Directory(
       path.join(cacheRoot.path, 'hyper-axis-core-$_coreCommit'),

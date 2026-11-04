@@ -75,13 +75,12 @@ class HyperAxisRustLib
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => 941349784;
+  int get rustContentHash => 822832775;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
         stem: 'hyper_axis_ffi',
-        ioDirectory:
-            '.dart_tool/hyper-axis-core/crates/hyper-axis-ffi/target/release/',
+        ioDirectory: '../hyper-axis/crates/hyper-axis-ffi/target/release/',
         webPrefix: 'pkg/',
         wasmBindgenName: 'wasm_bindgen',
       );
@@ -115,6 +114,14 @@ abstract class HyperAxisRustLibApi extends BaseApi {
 
   String crateApiRuntimeDrainLogsJson();
 
+  String crateApiOrdersFinalizeCancelJson({
+    required String preparedJson,
+    required String r,
+    required String s,
+    required int v,
+    required String expectedSigner,
+  });
+
   String crateApiOrdersFinalizeOrderJson({
     required String preparedJson,
     required String r,
@@ -139,6 +146,14 @@ abstract class HyperAxisRustLibApi extends BaseApi {
     required String expectedSigner,
   });
 
+  String crateApiAccountsFinalizeWithdrawJson({
+    required String preparedJson,
+    required String r,
+    required String s,
+    required int v,
+    required String expectedSigner,
+  });
+
   Future<void> crateApiRuntimeInitializeBridge();
 
   String crateApiRuntimeNormalizeDecimal({required String value});
@@ -151,6 +166,8 @@ abstract class HyperAxisRustLibApi extends BaseApi {
 
   String crateApiAccountsParseSpotAccountStateJson({required String body});
 
+  String crateApiOrdersPrepareCancelJson({required String requestJson});
+
   String crateApiOrdersPrepareLimitOrderJson({required String requestJson});
 
   String crateApiRiskPrepareUpdateLeverageJson({required String requestJson});
@@ -158,6 +175,8 @@ abstract class HyperAxisRustLibApi extends BaseApi {
   String crateApiAccountsPrepareUsdClassTransferJson({
     required String requestJson,
   });
+
+  String crateApiAccountsPrepareWithdrawJson({required String requestJson});
 
   String crateApiRuntimeProtocolVersion();
 
@@ -376,7 +395,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
       const TaskConstMeta(debugName: "drain_logs_json", argNames: []);
 
   @override
-  String crateApiOrdersFinalizeOrderJson({
+  String crateApiOrdersFinalizeCancelJson({
     required String preparedJson,
     required String r,
     required String s,
@@ -393,6 +412,42 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
           sse_encode_u_8(v, serializer);
           sse_encode_String(expectedSigner, serializer);
           return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiOrdersFinalizeCancelJsonConstMeta,
+        argValues: [preparedJson, r, s, v, expectedSigner],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiOrdersFinalizeCancelJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "finalize_cancel_json",
+        argNames: ["preparedJson", "r", "s", "v", "expectedSigner"],
+      );
+
+  @override
+  String crateApiOrdersFinalizeOrderJson({
+    required String preparedJson,
+    required String r,
+    required String s,
+    required int v,
+    required String expectedSigner,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(preparedJson, serializer);
+          sse_encode_String(r, serializer);
+          sse_encode_String(s, serializer);
+          sse_encode_u_8(v, serializer);
+          sse_encode_String(expectedSigner, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -428,7 +483,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
           sse_encode_String(s, serializer);
           sse_encode_u_8(v, serializer);
           sse_encode_String(expectedSigner, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -464,7 +519,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
           sse_encode_String(s, serializer);
           sse_encode_u_8(v, serializer);
           sse_encode_String(expectedSigner, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 11)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -484,6 +539,42 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
       );
 
   @override
+  String crateApiAccountsFinalizeWithdrawJson({
+    required String preparedJson,
+    required String r,
+    required String s,
+    required int v,
+    required String expectedSigner,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(preparedJson, serializer);
+          sse_encode_String(r, serializer);
+          sse_encode_String(s, serializer);
+          sse_encode_u_8(v, serializer);
+          sse_encode_String(expectedSigner, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 12)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiAccountsFinalizeWithdrawJsonConstMeta,
+        argValues: [preparedJson, r, s, v, expectedSigner],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAccountsFinalizeWithdrawJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "finalize_withdraw_json",
+        argNames: ["preparedJson", "r", "s", "v", "expectedSigner"],
+      );
+
+  @override
   Future<void> crateApiRuntimeInitializeBridge() {
     return handler.executeNormal(
       NormalTask(
@@ -492,7 +583,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 11,
+            funcId: 13,
             port: port_,
           );
         },
@@ -517,7 +608,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(value, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 12)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 14)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -542,7 +633,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(message, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 13)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 15)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -569,7 +660,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(body, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 14)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 16)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -595,7 +686,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(body, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 15)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 17)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -615,13 +706,39 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
       );
 
   @override
+  String crateApiOrdersPrepareCancelJson({required String requestJson}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(requestJson, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 18)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiOrdersPrepareCancelJsonConstMeta,
+        argValues: [requestJson],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiOrdersPrepareCancelJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "prepare_cancel_json",
+        argNames: ["requestJson"],
+      );
+
+  @override
   String crateApiOrdersPrepareLimitOrderJson({required String requestJson}) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(requestJson, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 16)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 19)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -647,7 +764,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(requestJson, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 17)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 20)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -675,7 +792,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(requestJson, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 18)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 21)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -695,12 +812,38 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
       );
 
   @override
+  String crateApiAccountsPrepareWithdrawJson({required String requestJson}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(requestJson, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 22)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiAccountsPrepareWithdrawJsonConstMeta,
+        argValues: [requestJson],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAccountsPrepareWithdrawJsonConstMeta =>
+      const TaskConstMeta(
+        debugName: "prepare_withdraw_json",
+        argNames: ["requestJson"],
+      );
+
+  @override
   String crateApiRuntimeProtocolVersion() {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 19)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 23)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -722,7 +865,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 20)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 24)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -749,7 +892,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(user, serializer);
           sse_encode_String(dex, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 21)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 25)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -779,7 +922,7 @@ class HyperAxisRustLibApiImpl extends HyperAxisRustLibApiImplPlatform
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(user, serializer);
           sse_encode_opt_box_autoadd_bool(isPortfolioMargin, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 22)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 26)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,

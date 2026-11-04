@@ -110,6 +110,27 @@ void main() {
       expect(finalized.endpoint, 'https://example.test/exchange');
     });
 
+    test('delegates cancellation preparation and finalization', () {
+      final HyperAxisClient client = HyperAxisClient.withBridge(_FakeBridge());
+      final HyperAxisPreparedOrder prepared = client.prepareCancel(
+        HyperAxisCancelRequest(
+          network: HyperAxisNetwork.mainnet,
+          cancels: const <HyperAxisCancelOrder>[
+            HyperAxisCancelOrder(asset: 3, orderId: '42'),
+          ],
+          nonce: '1234567890000',
+        ),
+      );
+      final HyperAxisFinalizedAction finalized = client.finalizeCancel(
+        prepared: prepared,
+        signature: const HyperAxisSignature(r: '0x01', s: '0x02', v: 27),
+        expectedSigner: _FakeBridge.user,
+      );
+
+      expect(prepared.signingDigestHex, 'cancel-digest');
+      expect(finalized.requestJson, contains('cancel'));
+    });
+
     test('delegates leverage preparation and finalization', () {
       final HyperAxisClient client = HyperAxisClient.withBridge(_FakeBridge());
       final HyperAxisPreparedLeverageUpdate prepared = client
@@ -181,6 +202,20 @@ void main() {
             signature: const HyperAxisSignature(r: '0x01', s: '0x02', v: 27),
             expectedSigner: _FakeBridge.user,
           );
+      final HyperAxisPreparedUserAction withdrawal = client.prepareWithdraw(
+        const HyperAxisWithdrawRequest(
+          network: HyperAxisNetwork.mainnet,
+          destination: _FakeBridge.user,
+          amount: '5',
+          nonce: '1234567890001',
+        ),
+      );
+      final HyperAxisFinalizedAction finalizedWithdrawal = client
+          .finalizeWithdraw(
+            prepared: withdrawal,
+            signature: const HyperAxisSignature(r: '0x01', s: '0x02', v: 27),
+            expectedSigner: _FakeBridge.user,
+          );
 
       expect(perpRequest.body, contains('clearinghouseState'));
       expect(spotRequest.body, contains('spotClearinghouseState'));
@@ -199,6 +234,8 @@ void main() {
         contains('spotState'),
       );
       expect(prepared.signingDigestHex, 'transfer-digest');
+      expect(withdrawal.signingDigestHex, 'withdraw-digest');
+      expect(finalizedWithdrawal.requestJson, contains('withdraw3'));
       expect(
         client.buildAccountExchangeRequest(finalized).kind,
         'signedAction',
@@ -325,6 +362,19 @@ final class _FakeBridge implements HyperAxisBridge {
   }
 
   @override
+  HyperAxisFinalizedAction finalizeCancel({
+    required HyperAxisPreparedOrder prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    return HyperAxisFinalizedAction(
+      endpoint: 'https://example.test/exchange',
+      requestJson: '{"action":{"type":"cancel"}}',
+      recoveredSigner: expectedSigner,
+    );
+  }
+
+  @override
   HyperAxisFinalizedAction finalizeUpdateLeverage({
     required HyperAxisPreparedLeverageUpdate prepared,
     required HyperAxisSignature signature,
@@ -351,6 +401,19 @@ final class _FakeBridge implements HyperAxisBridge {
   }
 
   @override
+  HyperAxisFinalizedAction finalizeWithdraw({
+    required HyperAxisPreparedUserAction prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    return HyperAxisFinalizedAction(
+      endpoint: 'https://example.test/exchange',
+      requestJson: '{"action":{"type":"withdraw3"}}',
+      recoveredSigner: expectedSigner,
+    );
+  }
+
+  @override
   String normalizeDecimal(String value) => '1.23';
 
   @override
@@ -364,6 +427,21 @@ final class _FakeBridge implements HyperAxisBridge {
       messagePackHex: '00',
       actionHashHex: 'hash',
       signingDigestHex: 'digest',
+      bridgeJson: '{}',
+    );
+  }
+
+  @override
+  HyperAxisPreparedOrder prepareCancel(HyperAxisCancelRequest request) {
+    return const HyperAxisPreparedOrder(
+      network: HyperAxisNetwork.mainnet,
+      nonce: '1234567890000',
+      vaultAddress: null,
+      expiresAfter: null,
+      actionJson: '{"type":"cancel"}',
+      messagePackHex: '00',
+      actionHashHex: 'cancel-hash',
+      signingDigestHex: 'cancel-digest',
       bridgeJson: '{}',
     );
   }
@@ -394,6 +472,19 @@ final class _FakeBridge implements HyperAxisBridge {
       nonce: '1234567890000',
       actionJson: '{"type":"usdClassTransfer"}',
       signingDigestHex: 'transfer-digest',
+      bridgeJson: '{}',
+    );
+  }
+
+  @override
+  HyperAxisPreparedUserAction prepareWithdraw(
+    HyperAxisWithdrawRequest request,
+  ) {
+    return const HyperAxisPreparedUserAction(
+      network: HyperAxisNetwork.mainnet,
+      nonce: '1234567890001',
+      actionJson: '{"type":"withdraw3"}',
+      signingDigestHex: 'withdraw-digest',
       bridgeJson: '{}',
     );
   }
@@ -517,6 +608,13 @@ final class _ThrowingBridge implements HyperAxisBridge {
   }) => _fail();
 
   @override
+  HyperAxisFinalizedAction finalizeCancel({
+    required HyperAxisPreparedOrder prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) => _fail();
+
+  @override
   HyperAxisFinalizedAction finalizeUpdateLeverage({
     required HyperAxisPreparedLeverageUpdate prepared,
     required HyperAxisSignature signature,
@@ -531,12 +629,23 @@ final class _ThrowingBridge implements HyperAxisBridge {
   }) => _fail();
 
   @override
+  HyperAxisFinalizedAction finalizeWithdraw({
+    required HyperAxisPreparedUserAction prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) => _fail();
+
+  @override
   String normalizeDecimal(String value) => _fail();
 
   @override
   HyperAxisPreparedOrder prepareLimitOrder(HyperAxisLimitOrderRequest request) {
     return _fail();
   }
+
+  @override
+  HyperAxisPreparedOrder prepareCancel(HyperAxisCancelRequest request) =>
+      _fail();
 
   @override
   HyperAxisPreparedLeverageUpdate prepareUpdateLeverage(
@@ -546,6 +655,11 @@ final class _ThrowingBridge implements HyperAxisBridge {
   @override
   HyperAxisPreparedUserAction prepareUsdClassTransfer(
     HyperAxisUsdClassTransferRequest request,
+  ) => _fail();
+
+  @override
+  HyperAxisPreparedUserAction prepareWithdraw(
+    HyperAxisWithdrawRequest request,
   ) => _fail();
 
   @override

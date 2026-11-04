@@ -181,6 +181,77 @@ final class HyperAxisLimitOrderRequest {
   });
 }
 
+/// One exchange order selected for cancellation by its server-assigned OID.
+final class HyperAxisCancelOrder {
+  /// Creates an exact cancellation selector.
+  const HyperAxisCancelOrder({required this.asset, required this.orderId});
+
+  /// Hyperliquid exchange asset identifier.
+  final int asset;
+
+  /// Unsigned decimal OID string returned by the exchange.
+  final String orderId;
+
+  /// Encodes this selector for the Rust request schema.
+  Map<String, Object?> toBridgeJson() => <String, Object?>{
+    'asset': asset,
+    'oid': orderId,
+  };
+}
+
+/// Exact input for preparing one or more Hyperliquid cancellations.
+final class HyperAxisCancelRequest {
+  /// Creates a cancellation request without handling private keys.
+  HyperAxisCancelRequest({
+    required this.network,
+    required List<HyperAxisCancelOrder> cancels,
+    required this.nonce,
+    this.vaultAddress,
+    this.expiresAfter,
+  }) : cancels = List<HyperAxisCancelOrder>.unmodifiable(cancels) {
+    if (cancels.isEmpty) {
+      throw HyperAxisException(
+        code: HyperAxisErrorCode.invalidArgument,
+        message: 'cancels must not be empty.',
+      );
+    }
+    for (final HyperAxisCancelOrder cancel in cancels) {
+      _requireUnsignedRange('asset', cancel.asset, 0xffffffff);
+      _requireUnsignedDecimal('orderId', cancel.orderId);
+    }
+    _requireUnsignedDecimal('nonce', nonce);
+    if (expiresAfter != null) {
+      _requireUnsignedDecimal('expiresAfter', expiresAfter!);
+    }
+  }
+
+  /// Target environment.
+  final HyperAxisNetwork network;
+
+  /// Non-empty immutable cancellation collection.
+  final List<HyperAxisCancelOrder> cancels;
+
+  /// Millisecond nonce encoded as an unsigned decimal string.
+  final String nonce;
+
+  /// Optional vault or subaccount address.
+  final String? vaultAddress;
+
+  /// Optional expiry timestamp encoded as an unsigned decimal string.
+  final String? expiresAfter;
+
+  /// Encodes the exact Rust request schema.
+  String toBridgeJson() => jsonEncode(<String, Object?>{
+    'network': network.wireName,
+    'cancels': cancels
+        .map((HyperAxisCancelOrder value) => value.toBridgeJson())
+        .toList(growable: false),
+    'nonce': nonce,
+    'vaultAddress': vaultAddress,
+    'expiresAfter': expiresAfter,
+  });
+}
+
 /// Opaque Rust-validated artifacts required by the platform signer.
 final class HyperAxisPreparedOrder {
   /// Creates a decoded prepared order returned by the bridge.
@@ -273,6 +344,15 @@ void _requireUnsignedRange(String field, int value, int maximum) {
       code: HyperAxisErrorCode.invalidArgument,
       message: '$field is outside its unsigned integer range.',
       details: <String, Object?>{'field': field},
+    );
+  }
+}
+
+void _requireUnsignedDecimal(String field, String value) {
+  if (!RegExp(r'^(0|[1-9][0-9]*)$').hasMatch(value)) {
+    throw HyperAxisException(
+      code: HyperAxisErrorCode.invalidArgument,
+      message: '$field must be an unsigned decimal string.',
     );
   }
 }

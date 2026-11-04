@@ -96,6 +96,30 @@ final class HyperAxisClient {
     );
   }
 
+  /// Validates and prepares one or more order cancellations.
+  HyperAxisPreparedOrder prepareCancel(HyperAxisCancelRequest request) {
+    return _guard(
+      operation: 'prepareCancel',
+      invoke: () => _bridge.prepareCancel(request),
+    );
+  }
+
+  /// Verifies a platform signature and builds the canonical cancel request.
+  HyperAxisFinalizedAction finalizeCancel({
+    required HyperAxisPreparedOrder prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    return _guard(
+      operation: 'finalizeCancel',
+      invoke: () => _bridge.finalizeCancel(
+        prepared: prepared,
+        signature: signature,
+        expectedSigner: expectedSigner,
+      ),
+    );
+  }
+
   /// Validates and prepares a leverage update without handling private keys.
   HyperAxisPreparedLeverageUpdate prepareUpdateLeverage(
     HyperAxisUpdateLeverageRequest request,
@@ -222,6 +246,32 @@ final class HyperAxisClient {
     return _guard(
       operation: 'finalizeUsdClassTransfer',
       invoke: () => _bridge.finalizeUsdClassTransfer(
+        prepared: prepared,
+        signature: signature,
+        expectedSigner: expectedSigner,
+      ),
+    );
+  }
+
+  /// Prepares a Hyperliquid bridge withdrawal for main-wallet signing.
+  HyperAxisPreparedUserAction prepareWithdraw(
+    HyperAxisWithdrawRequest request,
+  ) {
+    return _guard(
+      operation: 'prepareWithdraw',
+      invoke: () => _bridge.prepareWithdraw(request),
+    );
+  }
+
+  /// Verifies and finalizes a prepared Hyperliquid bridge withdrawal.
+  HyperAxisFinalizedAction finalizeWithdraw({
+    required HyperAxisPreparedUserAction prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    return _guard(
+      operation: 'finalizeWithdraw',
+      invoke: () => _bridge.finalizeWithdraw(
         prepared: prepared,
         signature: signature,
         expectedSigner: expectedSigner,
