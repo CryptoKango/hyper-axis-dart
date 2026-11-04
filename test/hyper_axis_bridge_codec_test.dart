@@ -101,6 +101,23 @@ void main() {
       );
     });
   });
+
+  group('leverage bridge codec', () {
+    test('decodes exact prepared leverage artifacts', () {
+      final HyperAxisPreparedLeverageUpdate prepared =
+          HyperAxisBridgeCodec.decodePreparedLeverageUpdate(
+            '{"network":"testnet","action":{},'
+            '"nonce":"18446744073709551615","vaultAddress":null,'
+            '"expiresAfter":null,"actionJson":"{}",'
+            '"messagePackHex":"00","actionHashHex":"aa",'
+            '"signingDigestHex":"bb"}',
+          );
+
+      expect(prepared.network, HyperAxisNetwork.testnet);
+      expect(prepared.nonce, '18446744073709551615');
+      expect(prepared.signingDigestHex, 'bb');
+    });
+  });
 }
 
 final Matcher throwsBridgeFailure = throwsA(

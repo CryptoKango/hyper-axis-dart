@@ -8,7 +8,8 @@ HyperAxis Rust Core 的 Dart/Flutter SDK。该仓库负责稳定的 Dart API、N
 仓库已完成 Native bridge 接入：公共 API 门面、bridge 隔离接口、强类型错误、日志模型、
 严格 JSON 解码、FRB 生成代码、测试和 CI。当前 ABI 覆盖运行时版本、精度规范化、脱敏
 日志、限价单准备与外部签名验证，以及合约/现货账户查询、实时账户订阅和 Spot/Perp USDC
-划转。Flutter 平台仅支持 Android 与 iOS；Web 由 `hyper-axis-ts` 独立交付。
+划转、全仓/逐仓杠杆更新。Flutter 平台仅支持 Android 与 iOS；Web 由
+`hyper-axis-ts` 独立交付。
 
 ## 架构
 
@@ -73,6 +74,26 @@ final finalized = client.finalizeUsdClassTransfer(
   expectedSigner: address,
 );
 final exchangeRequest = client.buildAccountExchangeRequest(finalized);
+```
+
+杠杆设置同样由 Rust 构造和校验待签名动作，宿主只负责签署摘要与提交最终请求：
+
+```dart
+final prepared = client.prepareUpdateLeverage(
+  HyperAxisUpdateLeverageRequest(
+    network: HyperAxisNetwork.mainnet,
+    asset: 3,
+    isCross: false,
+    leverage: 12,
+    maxLeverage: 40,
+    nonce: '1730000000000',
+  ),
+);
+final finalized = client.finalizeUpdateLeverage(
+  prepared: prepared,
+  signature: walletSignature,
+  expectedSigner: address,
+);
 ```
 
 ## 开发

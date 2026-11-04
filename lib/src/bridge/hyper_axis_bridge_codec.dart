@@ -3,6 +3,7 @@ import 'dart:convert';
 import '../error/hyper_axis_exception.dart';
 import '../logging/hyper_axis_log.dart';
 import '../models/orders.dart';
+import '../models/risk.dart';
 
 /// Strict decoder for JSON returned by the Rust bridge.
 ///
@@ -41,6 +42,28 @@ final class HyperAxisBridgeCodec {
     final Map<String, Object?> object = _decodeObject(json, 'prepared order');
     _readObject(object, 'action');
     return HyperAxisPreparedOrder(
+      network: _decodeNetwork(_readString(object, 'network')),
+      nonce: _readString(object, 'nonce'),
+      vaultAddress: _readNullableString(object, 'vaultAddress'),
+      expiresAfter: _readNullableString(object, 'expiresAfter'),
+      actionJson: _readString(object, 'actionJson'),
+      messagePackHex: _readString(object, 'messagePackHex'),
+      actionHashHex: _readString(object, 'actionHashHex'),
+      signingDigestHex: _readString(object, 'signingDigestHex'),
+      bridgeJson: json,
+    );
+  }
+
+  /// Decodes an opaque prepared leverage update.
+  static HyperAxisPreparedLeverageUpdate decodePreparedLeverageUpdate(
+    String json,
+  ) {
+    final Map<String, Object?> object = _decodeObject(
+      json,
+      'prepared leverage update',
+    );
+    _readObject(object, 'action');
+    return HyperAxisPreparedLeverageUpdate(
       network: _decodeNetwork(_readString(object, 'network')),
       nonce: _readString(object, 'nonce'),
       vaultAddress: _readNullableString(object, 'vaultAddress'),

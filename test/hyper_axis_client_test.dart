@@ -110,6 +110,49 @@ void main() {
       expect(finalized.endpoint, 'https://example.test/exchange');
     });
 
+    test('delegates leverage preparation and finalization', () {
+      final HyperAxisClient client = HyperAxisClient.withBridge(_FakeBridge());
+      final HyperAxisPreparedLeverageUpdate prepared = client
+          .prepareUpdateLeverage(
+            HyperAxisUpdateLeverageRequest(
+              network: HyperAxisNetwork.mainnet,
+              asset: 3,
+              isCross: false,
+              leverage: 12,
+              maxLeverage: 50,
+              nonce: '1234567890000',
+            ),
+          );
+      final HyperAxisFinalizedAction finalized = client.finalizeUpdateLeverage(
+        prepared: prepared,
+        signature: const HyperAxisSignature(r: '0x01', s: '0x02', v: 27),
+        expectedSigner: _FakeBridge.user,
+      );
+
+      expect(prepared.signingDigestHex, 'leverage-digest');
+      expect(finalized.requestJson, contains('updateLeverage'));
+    });
+
+    test('rejects leverage above market metadata maximum', () {
+      expect(
+        () => HyperAxisUpdateLeverageRequest(
+          network: HyperAxisNetwork.mainnet,
+          asset: 3,
+          isCross: true,
+          leverage: 51,
+          maxLeverage: 50,
+          nonce: '1234567890000',
+        ),
+        throwsA(
+          isA<HyperAxisException>().having(
+            (HyperAxisException error) => error.code,
+            'code',
+            HyperAxisErrorCode.invalidArgument,
+          ),
+        ),
+      );
+    });
+
     test('delegates account queries, subscriptions, and transfers', () {
       final HyperAxisClient client = HyperAxisClient.withBridge(_FakeBridge());
 
@@ -282,6 +325,19 @@ final class _FakeBridge implements HyperAxisBridge {
   }
 
   @override
+  HyperAxisFinalizedAction finalizeUpdateLeverage({
+    required HyperAxisPreparedLeverageUpdate prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    return HyperAxisFinalizedAction(
+      endpoint: 'https://example.test/exchange',
+      requestJson: '{"action":{"type":"updateLeverage"}}',
+      recoveredSigner: expectedSigner,
+    );
+  }
+
+  @override
   HyperAxisFinalizedAction finalizeUsdClassTransfer({
     required HyperAxisPreparedUserAction prepared,
     required HyperAxisSignature signature,
@@ -308,6 +364,23 @@ final class _FakeBridge implements HyperAxisBridge {
       messagePackHex: '00',
       actionHashHex: 'hash',
       signingDigestHex: 'digest',
+      bridgeJson: '{}',
+    );
+  }
+
+  @override
+  HyperAxisPreparedLeverageUpdate prepareUpdateLeverage(
+    HyperAxisUpdateLeverageRequest request,
+  ) {
+    return const HyperAxisPreparedLeverageUpdate(
+      network: HyperAxisNetwork.mainnet,
+      nonce: '1234567890000',
+      vaultAddress: null,
+      expiresAfter: null,
+      actionJson: '{"type":"updateLeverage"}',
+      messagePackHex: '00',
+      actionHashHex: 'leverage-hash',
+      signingDigestHex: 'leverage-digest',
       bridgeJson: '{}',
     );
   }
@@ -444,6 +517,13 @@ final class _ThrowingBridge implements HyperAxisBridge {
   }) => _fail();
 
   @override
+  HyperAxisFinalizedAction finalizeUpdateLeverage({
+    required HyperAxisPreparedLeverageUpdate prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) => _fail();
+
+  @override
   HyperAxisFinalizedAction finalizeUsdClassTransfer({
     required HyperAxisPreparedUserAction prepared,
     required HyperAxisSignature signature,
@@ -457,6 +537,11 @@ final class _ThrowingBridge implements HyperAxisBridge {
   HyperAxisPreparedOrder prepareLimitOrder(HyperAxisLimitOrderRequest request) {
     return _fail();
   }
+
+  @override
+  HyperAxisPreparedLeverageUpdate prepareUpdateLeverage(
+    HyperAxisUpdateLeverageRequest request,
+  ) => _fail();
 
   @override
   HyperAxisPreparedUserAction prepareUsdClassTransfer(

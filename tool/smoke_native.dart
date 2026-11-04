@@ -52,6 +52,21 @@ Future<void> main() async {
     throw StateError('Rust recovered an unexpected order signer.');
   }
 
+  final HyperAxisPreparedLeverageUpdate leverage = bridge.prepareUpdateLeverage(
+    HyperAxisUpdateLeverageRequest(
+      network: HyperAxisNetwork.mainnet,
+      asset: 4,
+      isCross: false,
+      leverage: 12,
+      maxLeverage: 50,
+      nonce: '1234567890000',
+    ),
+  );
+  if (!leverage.actionJson.contains('updateLeverage') ||
+      leverage.signingDigestHex.isEmpty) {
+    throw StateError('Rust returned an invalid leverage update artifact.');
+  }
+
   final HyperAxisHttpRequest perpRequest = bridge.buildPerpAccountRequest(
     network: HyperAxisNetwork.mainnet,
     user: '0x000000000000000000000000000000000000beef',

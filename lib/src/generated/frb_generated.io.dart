@@ -5,6 +5,7 @@
 
 import 'api/accounts.dart';
 import 'api/orders.dart';
+import 'api/risk.dart';
 import 'api/runtime.dart';
 import 'dart:async';
 import 'dart:convert';

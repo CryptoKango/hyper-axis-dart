@@ -1,11 +1,13 @@
 import '../error/hyper_axis_exception.dart';
 import '../generated/api/accounts.dart' as native_accounts;
 import '../generated/api/orders.dart' as native_orders;
+import '../generated/api/risk.dart' as native_risk;
 import '../generated/api/runtime.dart' as native;
 import '../generated/frb_generated.dart';
 import '../logging/hyper_axis_log.dart';
 import '../models/accounts.dart';
 import '../models/orders.dart';
+import '../models/risk.dart';
 import 'hyper_axis_account_bridge_codec.dart';
 import 'hyper_axis_bridge.dart';
 import 'hyper_axis_bridge_codec.dart';
@@ -73,6 +75,40 @@ final class FrbHyperAxisBridge implements HyperAxisBridge {
       operation: 'finalizeOrder',
       errorCode: HyperAxisErrorCode.signing,
       invoke: () => native_orders.finalizeOrderJson(
+        preparedJson: prepared.bridgeJson,
+        r: signature.r,
+        s: signature.s,
+        v: signature.v,
+        expectedSigner: expectedSigner,
+      ),
+    );
+    return HyperAxisBridgeCodec.decodeFinalizedAction(json);
+  }
+
+  @override
+  HyperAxisPreparedLeverageUpdate prepareUpdateLeverage(
+    HyperAxisUpdateLeverageRequest request,
+  ) {
+    final String json = _invoke(
+      operation: 'prepareUpdateLeverage',
+      errorCode: HyperAxisErrorCode.protocol,
+      invoke: () => native_risk.prepareUpdateLeverageJson(
+        requestJson: request.toBridgeJson(),
+      ),
+    );
+    return HyperAxisBridgeCodec.decodePreparedLeverageUpdate(json);
+  }
+
+  @override
+  HyperAxisFinalizedAction finalizeUpdateLeverage({
+    required HyperAxisPreparedLeverageUpdate prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    final String json = _invoke(
+      operation: 'finalizeUpdateLeverage',
+      errorCode: HyperAxisErrorCode.signing,
+      invoke: () => native_risk.finalizeUpdateLeverageJson(
         preparedJson: prepared.bridgeJson,
         r: signature.r,
         s: signature.s,

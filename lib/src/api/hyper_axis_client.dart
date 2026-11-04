@@ -4,6 +4,7 @@ import '../error/hyper_axis_exception.dart';
 import '../logging/hyper_axis_log.dart';
 import '../models/accounts.dart';
 import '../models/orders.dart';
+import '../models/risk.dart';
 import '../version.dart';
 import 'retryable_async_cache.dart';
 
@@ -88,6 +89,32 @@ final class HyperAxisClient {
     return _guard(
       operation: 'finalizeOrder',
       invoke: () => _bridge.finalizeOrder(
+        prepared: prepared,
+        signature: signature,
+        expectedSigner: expectedSigner,
+      ),
+    );
+  }
+
+  /// Validates and prepares a leverage update without handling private keys.
+  HyperAxisPreparedLeverageUpdate prepareUpdateLeverage(
+    HyperAxisUpdateLeverageRequest request,
+  ) {
+    return _guard(
+      operation: 'prepareUpdateLeverage',
+      invoke: () => _bridge.prepareUpdateLeverage(request),
+    );
+  }
+
+  /// Verifies a platform signature and builds the leverage exchange request.
+  HyperAxisFinalizedAction finalizeUpdateLeverage({
+    required HyperAxisPreparedLeverageUpdate prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    return _guard(
+      operation: 'finalizeUpdateLeverage',
+      invoke: () => _bridge.finalizeUpdateLeverage(
         prepared: prepared,
         signature: signature,
         expectedSigner: expectedSigner,

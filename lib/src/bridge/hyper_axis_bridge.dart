@@ -1,6 +1,7 @@
 import '../logging/hyper_axis_log.dart';
 import '../models/accounts.dart';
 import '../models/orders.dart';
+import '../models/risk.dart';
 
 /// Typed boundary implemented by the generated Rust bridge adapter.
 ///
@@ -19,6 +20,18 @@ abstract interface class HyperAxisBridge {
   /// Verifies the signature and builds the exact exchange request.
   HyperAxisFinalizedAction finalizeOrder({
     required HyperAxisPreparedOrder prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  });
+
+  /// Validates and prepares one leverage update for platform signing.
+  HyperAxisPreparedLeverageUpdate prepareUpdateLeverage(
+    HyperAxisUpdateLeverageRequest request,
+  );
+
+  /// Verifies the signature and builds the leverage exchange request.
+  HyperAxisFinalizedAction finalizeUpdateLeverage({
+    required HyperAxisPreparedLeverageUpdate prepared,
     required HyperAxisSignature signature,
     required String expectedSigner,
   });
