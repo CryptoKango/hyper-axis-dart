@@ -7,7 +7,7 @@ void main() {
       final _FakeBridge bridge = _FakeBridge();
       final HyperAxisClient client = HyperAxisClient.withBridge(bridge);
 
-      expect(client.protocolVersion, '0.3.1');
+      expect(client.protocolVersion, '0.3.2');
       expect(client.normalizeDecimal('001.2300'), '1.23');
 
       final HyperAxisLoggingConfig applied = client.configureLogging(
@@ -284,7 +284,7 @@ void main() {
 }
 
 final class _FakeBridge implements HyperAxisBridge {
-  _FakeBridge({this.protocolVersion = '0.3.1'});
+  _FakeBridge({this.protocolVersion = '0.3.2'});
 
   static const String user = '0x0000000000000000000000000000000000000001';
 
@@ -566,7 +566,7 @@ final class _ThrowingBridge implements HyperAxisBridge {
   }
 
   @override
-  String get protocolVersion => '0.3.1';
+  String get protocolVersion => '0.3.2';
 
   @override
   String accountWebSocketUrl(HyperAxisNetwork network) => _fail();

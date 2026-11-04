@@ -1,5 +1,11 @@
 ## Unreleased
 
+## 0.4.0 - 2026-11-04
+
+- 新增 Hyperliquid 撤单与提现的准备、外部签名验证和 exchange 请求构建。
+- 扩展强类型 Dart 模型、bridge 门面、回归测试与 Native bridge 烟测。
+- Rust Core 固定升级至 v0.3.2，并校验 commit 与源码归档 SHA256。
+
 ## 0.3.1 - 2026-11-04
 
 - 新增 Hyperliquid 全仓/逐仓杠杆更新的准备、外部签名验证和 exchange 请求构建。
