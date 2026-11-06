@@ -21,6 +21,28 @@ abstract final class HyperAxisWebSocketCommands {
   static const Map<String, Object?> ping = <String, Object?>{'method': 'ping'};
 }
 
+/// Order identifier accepted by the Hyperliquid `orderStatus` Info query.
+final class HyperAxisOrderStatusSelector {
+  HyperAxisOrderStatusSelector._(Map<String, Object?> value)
+    : _value = Map<String, Object?>.unmodifiable(value);
+
+  final Map<String, Object?> _value;
+
+  /// Selects an order by its 128-bit client order id.
+  factory HyperAxisOrderStatusSelector.cloid(String cloid) =>
+      HyperAxisOrderStatusSelector._(<String, Object?>{
+        'kind': 'cloid',
+        'cloid': cloid,
+      });
+
+  /// Selects an order by its decimal Hyperliquid order id.
+  factory HyperAxisOrderStatusSelector.oid(String oid) =>
+      HyperAxisOrderStatusSelector._(<String, Object?>{
+        'kind': 'oid',
+        'oid': oid,
+      });
+}
+
 /// Validated, typed Hyperliquid Info query.
 final class HyperAxisInfoQuery {
   HyperAxisInfoQuery._(Map<String, Object?> value)
@@ -61,6 +83,16 @@ final class HyperAxisInfoQuery {
     'type': 'openOrders',
     'user': user,
     'dex': dex,
+  });
+
+  /// Current order state selected by an order id or client order id.
+  factory HyperAxisInfoQuery.orderStatus({
+    required String user,
+    required HyperAxisOrderStatusSelector selector,
+  }) => HyperAxisInfoQuery._(<String, Object?>{
+    'type': 'orderStatus',
+    'user': user,
+    'selector': selector._value,
   });
 
   /// Recent fills for one user.
@@ -120,6 +152,35 @@ final class HyperAxisSubscription {
   /// Compressed market-wide asset context updates.
   factory HyperAxisSubscription.fastAssetContexts() =>
       HyperAxisSubscription._(<String, Object?>{'type': 'fastAssetCtxs'});
+
+  /// Perpetual clearinghouse state for one user on a DEX.
+  ///
+  /// The empty DEX selects Hyperliquid's first perpetual DEX.
+  factory HyperAxisSubscription.clearinghouseState({
+    required String user,
+    String dex = '',
+  }) => HyperAxisSubscription._(<String, Object?>{
+    'type': 'clearinghouseState',
+    'user': user,
+    'dex': dex,
+  });
+
+  /// User order lifecycle updates.
+  factory HyperAxisSubscription.orderUpdates({required String user}) =>
+      HyperAxisSubscription._(<String, Object?>{
+        'type': 'orderUpdates',
+        'user': user,
+      });
+
+  /// User fills, optionally aggregated by time.
+  factory HyperAxisSubscription.userFills({
+    required String user,
+    bool? aggregateByTime,
+  }) {
+    final value = <String, Object?>{'type': 'userFills', 'user': user};
+    if (aggregateByTime != null) value['aggregateByTime'] = aggregateByTime;
+    return HyperAxisSubscription._(value);
+  }
 
   /// Candlestick updates.
   factory HyperAxisSubscription.candles({

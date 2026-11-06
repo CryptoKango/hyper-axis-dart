@@ -1,3 +1,8 @@
+## 0.5.2 - 2026-11-06
+
+- 新增 `orderStatus` Info 查询，支持通过十进制 `oid` 或 128-bit `cloid`
+  查询订单最终状态。
+
 ## 0.5.1 - 2026-11-06
 
 - 新增强类型 Hyperliquid Info、HTTP 响应和 WebSocket 传输 API。
