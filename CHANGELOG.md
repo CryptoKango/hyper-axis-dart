@@ -1,8 +1,9 @@
-## Unreleased
+## 0.5.0 - 2026-11-06
 
 - 单笔订单支持 Builder code `{address, fee}`，并由 Rust Core 校验后编码为
   Hyperliquid `{b, f}`。
 - 新增 `approveBuilderFee` 的准备、外部签名验证和 exchange 请求最终化 API。
+- Rust Core 固定升级至 v0.3.3。
 
 ## 0.4.0 - 2026-11-04
 

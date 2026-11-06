@@ -6,6 +6,7 @@
 | `0.3.0` | `v0.3.0` | `d273ded3b69c6c3eb61fb396a2a265a16ff0dfc4` | `2.13.0` | Runtime + Orders + Accounts v0（未冻结） | Android/iOS Native Assets，账户查询、订阅与划转桥接已验证 |
 | `0.3.1` | `v0.3.1` | `4bd99e0f5c896f27f3a1f9bfa06e4693aa4f0ed2` | `2.13.0` | Runtime + Orders + Accounts + Risk v0（未冻结） | Android/iOS Native Assets，全仓/逐仓杠杆更新桥接已验证 |
 | `0.4.0` | `v0.3.2` | `4e9c9b52e4608d753a18c4fc1d979f09cec261c9` | `2.13.0` | Runtime + Orders + Accounts + Risk v0（未冻结） | Android/iOS Native Assets，撤单与提现桥接已验证 |
+| `0.5.0` | `v0.3.3` | `456fd699e181752c08e2800a99db379b72d8dd96` | `2.13.0` | Runtime + Orders + Accounts + Risk + Builder v0（未冻结） | Android/iOS Native Assets，Builder code 与 Builder Fee 授权桥接已验证 |
 
 ## 规则
 
@@ -18,5 +19,6 @@
 - v0.3.0 源码归档 SHA256：`031962cf60e3f7b37160742a1177cc5b259d8a2657d33a86a9f1a9f2497b162b`。
 - v0.3.1 源码归档 SHA256：`0bdd2ef8ef697ccf4a8f3d49f65b9515c2387f3087bdbd1725c0dbf087616287`。
 - v0.3.2 源码归档 SHA256：`a6d56287259a5ffba0917276aa4b06200d3895093ef265f8c39ea9f0a4365692`。
+- v0.3.3 源码归档 SHA256：`1f1245e04e847d3fd89be8c8fca75e158582518d2911a8dcc3515b726ce53ca1`。
 - v0.1.0 构建端曾应用 `libc 0.2.189` 兼容补丁；v0.3.0 起 Cargo.lock 已原生锁定兼容版本，
   Native Assets hook 不再修改上游锁文件。
