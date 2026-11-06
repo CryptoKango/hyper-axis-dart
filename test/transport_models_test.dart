@@ -7,6 +7,11 @@ void main() {
   test('history queries preserve exact user and millisecond strings', () {
     const user = '0x000000000000000000000000000000000000beef';
     final orders = HyperAxisInfoQuery.historicalOrders(user);
+    final fills = HyperAxisInfoQuery.userFillsByTime(
+      user: user,
+      startTime: 5,
+      endTime: 6,
+    );
     final funding = HyperAxisInfoQuery.userFunding(
       user: user,
       startTime: 1,
@@ -21,6 +26,13 @@ void main() {
     expect(jsonDecode(orders.toBridgeJson()), <String, Object?>{
       'type': 'historicalOrders',
       'user': user,
+    });
+    expect(jsonDecode(fills.toBridgeJson()), <String, Object?>{
+      'type': 'userFillsByTime',
+      'user': user,
+      'startTime': '5',
+      'endTime': '6',
+      'aggregateByTime': false,
     });
     expect(jsonDecode(funding.toBridgeJson()), <String, Object?>{
       'type': 'userFunding',

@@ -1,3 +1,7 @@
+## 0.5.5 - 2026-11-06
+
+- Add the typed `userFillsByTime` Info query for bounded fill-history pagination.
+
 ## 0.5.4 - 2026-11-06
 
 - 新增 `userNonFundingLedgerUpdates` 强类型 Info 查询，用于安全核对充值、

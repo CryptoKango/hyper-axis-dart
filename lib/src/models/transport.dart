@@ -100,6 +100,23 @@ final class HyperAxisInfoQuery {
     <String, Object?>{'type': 'userFills', 'user': user},
   );
 
+  /// Fills for one user inside an explicit millisecond time range.
+  factory HyperAxisInfoQuery.userFillsByTime({
+    required String user,
+    required int startTime,
+    int? endTime,
+    bool aggregateByTime = false,
+  }) {
+    final value = <String, Object?>{
+      'type': 'userFillsByTime',
+      'user': user,
+      'startTime': startTime.toString(),
+      'aggregateByTime': aggregateByTime,
+    };
+    if (endTime != null) value['endTime'] = endTime.toString();
+    return HyperAxisInfoQuery._(value);
+  }
+
   /// Historical orders for one user.
   factory HyperAxisInfoQuery.historicalOrders(String user) =>
       HyperAxisInfoQuery._(<String, Object?>{
