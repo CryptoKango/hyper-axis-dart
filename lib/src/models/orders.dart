@@ -14,6 +14,12 @@ enum HyperAxisNetwork {
 
   /// Exact Rust wire representation.
   final String wireName;
+
+  /// Official Hyperliquid WebSocket endpoint for this environment.
+  String get websocketUrl => switch (this) {
+    HyperAxisNetwork.mainnet => 'wss://api.hyperliquid.xyz/ws',
+    HyperAxisNetwork.testnet => 'wss://api.hyperliquid-testnet.xyz/ws',
+  };
 }
 
 /// Market family controlling price and size precision rules.

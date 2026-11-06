@@ -2,6 +2,7 @@ import '../logging/hyper_axis_log.dart';
 import '../models/accounts.dart';
 import '../models/orders.dart';
 import '../models/risk.dart';
+import '../models/transport.dart';
 import '../models/users.dart';
 
 /// Typed boundary implemented by the generated Rust bridge adapter.
@@ -14,6 +15,43 @@ abstract interface class HyperAxisBridge {
 
   /// Returns the canonical wire representation of an exact decimal string.
   String normalizeDecimal(String value);
+
+  /// Validates and canonicalizes one typed Info query.
+  HyperAxisPreparedInfoQuery prepareInfoQuery(HyperAxisInfoQuery query);
+
+  /// Builds an official `POST /info` request from a typed query.
+  HyperAxisHttpRequest buildTypedInfoRequest({
+    required HyperAxisNetwork network,
+    required HyperAxisInfoQuery query,
+  });
+
+  /// Parses and classifies one host HTTP response.
+  HyperAxisParsedHttpResponse parseHttpResponse({
+    required HyperAxisRequestKind requestKind,
+    required int statusCode,
+    required String body,
+  });
+
+  /// Validates a `perpDexs` response.
+  Object? parsePerpDexesResponse(String body);
+
+  /// Validates a `metaAndAssetCtxs` response.
+  Object? parsePerpMetaAndAssetContextsResponse(String body);
+
+  /// Returns the official WebSocket endpoint.
+  String websocketUrl(HyperAxisNetwork network);
+
+  /// Builds a validated subscribe command.
+  String websocketSubscribe(HyperAxisSubscription subscription);
+
+  /// Builds a validated unsubscribe command.
+  String websocketUnsubscribe(HyperAxisSubscription subscription);
+
+  /// Builds the canonical heartbeat command.
+  String websocketPing();
+
+  /// Parses one inbound WebSocket envelope.
+  HyperAxisWebSocketMessage parseWebSocketMessage(String message);
 
   /// Validates and prepares one limit order for platform signing.
   HyperAxisPreparedOrder prepareLimitOrder(HyperAxisLimitOrderRequest request);

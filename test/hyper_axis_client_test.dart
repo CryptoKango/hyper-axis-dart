@@ -7,7 +7,7 @@ void main() {
       final _FakeBridge bridge = _FakeBridge();
       final HyperAxisClient client = HyperAxisClient.withBridge(bridge);
 
-      expect(client.protocolVersion, '0.3.3');
+      expect(client.protocolVersion, '0.3.4');
       expect(client.normalizeDecimal('001.2300'), '1.23');
 
       final HyperAxisLoggingConfig applied = client.configureLogging(
@@ -306,7 +306,7 @@ void main() {
 }
 
 final class _FakeBridge implements HyperAxisBridge {
-  _FakeBridge({this.protocolVersion = '0.3.3'});
+  _FakeBridge({this.protocolVersion = '0.3.4'});
 
   static const String user = '0x0000000000000000000000000000000000000001';
 
@@ -450,6 +450,65 @@ final class _FakeBridge implements HyperAxisBridge {
 
   @override
   String normalizeDecimal(String value) => '1.23';
+
+  @override
+  HyperAxisPreparedInfoQuery prepareInfoQuery(HyperAxisInfoQuery query) =>
+      const HyperAxisPreparedInfoQuery(queryType: 'test', body: '{}');
+
+  @override
+  HyperAxisHttpRequest buildTypedInfoRequest({
+    required HyperAxisNetwork network,
+    required HyperAxisInfoQuery query,
+  }) => HyperAxisHttpRequest(
+    kind: 'info',
+    method: 'POST',
+    url: 'https://example.test/info',
+    headers: const <String, String>{'content-type': 'application/json'},
+    body: '{}',
+  );
+
+  @override
+  HyperAxisParsedHttpResponse parseHttpResponse({
+    required HyperAxisRequestKind requestKind,
+    required int statusCode,
+    required String body,
+  }) => HyperAxisParsedHttpResponse(
+    requestKind: requestKind.wireName,
+    statusCode: statusCode,
+    kind: 'success',
+    retry: 'never',
+    payload: const <Object?>[],
+    message: null,
+  );
+
+  @override
+  Object? parsePerpDexesResponse(String body) => const <Object?>[];
+
+  @override
+  Object? parsePerpMetaAndAssetContextsResponse(String body) =>
+      const <Object?>[];
+
+  @override
+  String websocketUrl(HyperAxisNetwork network) => 'wss://example.test/ws';
+
+  @override
+  String websocketSubscribe(HyperAxisSubscription subscription) =>
+      '{"method":"subscribe"}';
+
+  @override
+  String websocketUnsubscribe(HyperAxisSubscription subscription) =>
+      '{"method":"unsubscribe"}';
+
+  @override
+  String websocketPing() => '{"method":"ping"}';
+
+  @override
+  HyperAxisWebSocketMessage parseWebSocketMessage(String message) =>
+      const HyperAxisWebSocketMessage(
+        channel: 'test',
+        data: <String, Object?>{},
+        canonicalJson: '{"channel":"test","data":{}}',
+      );
 
   @override
   HyperAxisPreparedOrder prepareLimitOrder(HyperAxisLimitOrderRequest request) {
@@ -614,7 +673,7 @@ final class _ThrowingBridge implements HyperAxisBridge {
   }
 
   @override
-  String get protocolVersion => '0.3.3';
+  String get protocolVersion => '0.3.4';
 
   @override
   String accountWebSocketUrl(HyperAxisNetwork network) => _fail();
@@ -692,6 +751,44 @@ final class _ThrowingBridge implements HyperAxisBridge {
 
   @override
   String normalizeDecimal(String value) => _fail();
+
+  @override
+  HyperAxisPreparedInfoQuery prepareInfoQuery(HyperAxisInfoQuery query) =>
+      _fail();
+
+  @override
+  HyperAxisHttpRequest buildTypedInfoRequest({
+    required HyperAxisNetwork network,
+    required HyperAxisInfoQuery query,
+  }) => _fail();
+
+  @override
+  HyperAxisParsedHttpResponse parseHttpResponse({
+    required HyperAxisRequestKind requestKind,
+    required int statusCode,
+    required String body,
+  }) => _fail();
+
+  @override
+  Object? parsePerpDexesResponse(String body) => _fail();
+
+  @override
+  Object? parsePerpMetaAndAssetContextsResponse(String body) => _fail();
+
+  @override
+  String websocketUrl(HyperAxisNetwork network) => _fail();
+
+  @override
+  String websocketSubscribe(HyperAxisSubscription subscription) => _fail();
+
+  @override
+  String websocketUnsubscribe(HyperAxisSubscription subscription) => _fail();
+
+  @override
+  String websocketPing() => _fail();
+
+  @override
+  HyperAxisWebSocketMessage parseWebSocketMessage(String message) => _fail();
 
   @override
   HyperAxisPreparedOrder prepareLimitOrder(HyperAxisLimitOrderRequest request) {

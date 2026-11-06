@@ -5,6 +5,7 @@ import '../logging/hyper_axis_log.dart';
 import '../models/accounts.dart';
 import '../models/orders.dart';
 import '../models/risk.dart';
+import '../models/transport.dart';
 import '../models/users.dart';
 import '../version.dart';
 import 'retryable_async_cache.dart';
@@ -69,6 +70,76 @@ final class HyperAxisClient {
       invoke: () => _bridge.normalizeDecimal(value),
     );
   }
+
+  /// Validates a typed Info query and returns its canonical wire body.
+  HyperAxisPreparedInfoQuery prepareInfoQuery(HyperAxisInfoQuery query) =>
+      _guard(
+        operation: 'prepareInfoQuery',
+        invoke: () => _bridge.prepareInfoQuery(query),
+      );
+
+  /// Builds a canonical `POST /info` request from a typed query.
+  HyperAxisHttpRequest buildTypedInfoRequest({
+    required HyperAxisNetwork network,
+    required HyperAxisInfoQuery query,
+  }) => _guard(
+    operation: 'buildTypedInfoRequest',
+    invoke: () => _bridge.buildTypedInfoRequest(network: network, query: query),
+  );
+
+  /// Parses and classifies an HTTP response using Rust protocol rules.
+  HyperAxisParsedHttpResponse parseHttpResponse({
+    required HyperAxisRequestKind requestKind,
+    required int statusCode,
+    required String body,
+  }) => _guard(
+    operation: 'parseHttpResponse',
+    invoke: () => _bridge.parseHttpResponse(
+      requestKind: requestKind,
+      statusCode: statusCode,
+      body: body,
+    ),
+  );
+
+  /// Validates a `perpDexs` response with Rust Core.
+  Object? parsePerpDexesResponse(String body) => _guard(
+    operation: 'parsePerpDexesResponse',
+    invoke: () => _bridge.parsePerpDexesResponse(body),
+  );
+
+  /// Validates an aligned `metaAndAssetCtxs` response with Rust Core.
+  Object? parsePerpMetaAndAssetContextsResponse(String body) => _guard(
+    operation: 'parsePerpMetaAndAssetContextsResponse',
+    invoke: () => _bridge.parsePerpMetaAndAssetContextsResponse(body),
+  );
+
+  /// Returns the official WebSocket endpoint for a network.
+  String websocketUrl(HyperAxisNetwork network) => _guard(
+    operation: 'websocketUrl',
+    invoke: () => _bridge.websocketUrl(network),
+  );
+
+  /// Validates a subscription and builds its subscribe command.
+  String websocketSubscribe(HyperAxisSubscription subscription) => _guard(
+    operation: 'websocketSubscribe',
+    invoke: () => _bridge.websocketSubscribe(subscription),
+  );
+
+  /// Validates a subscription and builds its unsubscribe command.
+  String websocketUnsubscribe(HyperAxisSubscription subscription) => _guard(
+    operation: 'websocketUnsubscribe',
+    invoke: () => _bridge.websocketUnsubscribe(subscription),
+  );
+
+  /// Returns the canonical heartbeat command.
+  String websocketPing() =>
+      _guard(operation: 'websocketPing', invoke: _bridge.websocketPing);
+
+  /// Parses one inbound WebSocket message with Rust Core.
+  HyperAxisWebSocketMessage parseWebSocketMessage(String message) => _guard(
+    operation: 'parseWebSocketMessage',
+    invoke: () => _bridge.parseWebSocketMessage(message),
+  );
 
   /// Validates and prepares a limit order without handling private keys.
   ///

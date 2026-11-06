@@ -1,3 +1,9 @@
+## 0.5.1 - 2026-11-06
+
+- 新增强类型 Hyperliquid Info、HTTP 响应和 WebSocket 传输 API。
+- 新增 `activeAssetData`、`maxBuilderFee` 查询与实时消息解析支持。
+- Rust Core 固定升级至 v0.3.4。
+
 ## 0.5.0 - 2026-11-06
 
 - 单笔订单支持 Builder code `{address, fee}`，并由 Rust Core 校验后编码为

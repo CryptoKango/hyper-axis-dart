@@ -3,16 +3,19 @@ import '../generated/api/accounts.dart' as native_accounts;
 import '../generated/api/orders.dart' as native_orders;
 import '../generated/api/risk.dart' as native_risk;
 import '../generated/api/runtime.dart' as native;
+import '../generated/api/transport.dart' as native_transport;
 import '../generated/api/users.dart' as native_users;
 import '../generated/frb_generated.dart';
 import '../logging/hyper_axis_log.dart';
 import '../models/accounts.dart';
 import '../models/orders.dart';
 import '../models/risk.dart';
+import '../models/transport.dart';
 import '../models/users.dart';
 import 'hyper_axis_account_bridge_codec.dart';
 import 'hyper_axis_bridge.dart';
 import 'hyper_axis_bridge_codec.dart';
+import 'hyper_axis_transport_bridge_codec.dart';
 
 /// Production bridge backed by generated Flutter Rust Bridge bindings.
 final class FrbHyperAxisBridge implements HyperAxisBridge {
@@ -53,6 +56,123 @@ final class FrbHyperAxisBridge implements HyperAxisBridge {
       errorCode: HyperAxisErrorCode.protocol,
       invoke: () => native.normalizeDecimal(value: value),
     );
+  }
+
+  @override
+  HyperAxisPreparedInfoQuery prepareInfoQuery(HyperAxisInfoQuery query) {
+    final json = _invoke(
+      operation: 'prepareInfoQuery',
+      errorCode: HyperAxisErrorCode.protocol,
+      invoke: () => native_transport.prepareInfoQueryJson(
+        queryJson: query.toBridgeJson(),
+      ),
+    );
+    return HyperAxisTransportBridgeCodec.decodePreparedInfoQuery(json);
+  }
+
+  @override
+  HyperAxisHttpRequest buildTypedInfoRequest({
+    required HyperAxisNetwork network,
+    required HyperAxisInfoQuery query,
+  }) {
+    final json = _invoke(
+      operation: 'buildTypedInfoRequest',
+      errorCode: HyperAxisErrorCode.protocol,
+      invoke: () => native_transport.buildTypedInfoRequestJson(
+        network: network.wireName,
+        queryJson: query.toBridgeJson(),
+      ),
+    );
+    return HyperAxisAccountBridgeCodec.decodeHttpRequest(json);
+  }
+
+  @override
+  HyperAxisParsedHttpResponse parseHttpResponse({
+    required HyperAxisRequestKind requestKind,
+    required int statusCode,
+    required String body,
+  }) {
+    final json = _invoke(
+      operation: 'parseHttpResponse',
+      errorCode: HyperAxisErrorCode.protocol,
+      invoke: () => native_transport.parseHttpResponseJson(
+        requestKind: requestKind.wireName,
+        statusCode: statusCode,
+        body: body,
+      ),
+    );
+    return HyperAxisTransportBridgeCodec.decodeHttpResponse(json);
+  }
+
+  @override
+  Object? parsePerpDexesResponse(String body) {
+    final json = _invoke(
+      operation: 'parsePerpDexesResponse',
+      errorCode: HyperAxisErrorCode.protocol,
+      invoke: () => native_transport.parsePerpDexsResponseJson(body: body),
+    );
+    return HyperAxisTransportBridgeCodec.decodeJsonValue(
+      json,
+      'perpetual DEX response',
+    );
+  }
+
+  @override
+  Object? parsePerpMetaAndAssetContextsResponse(String body) {
+    final json = _invoke(
+      operation: 'parsePerpMetaAndAssetContextsResponse',
+      errorCode: HyperAxisErrorCode.protocol,
+      invoke: () => native_transport.parsePerpMetaAndAssetContextsResponseJson(
+        body: body,
+      ),
+    );
+    return HyperAxisTransportBridgeCodec.decodeJsonValue(
+      json,
+      'perpetual metadata response',
+    );
+  }
+
+  @override
+  String websocketUrl(HyperAxisNetwork network) => _invoke(
+    operation: 'websocketUrl',
+    errorCode: HyperAxisErrorCode.protocol,
+    invoke: () => native_transport.websocketUrl(network: network.wireName),
+  );
+
+  @override
+  String websocketSubscribe(HyperAxisSubscription subscription) => _invoke(
+    operation: 'websocketSubscribe',
+    errorCode: HyperAxisErrorCode.protocol,
+    invoke: () => native_transport.websocketSubscribeJson(
+      subscriptionJson: subscription.toBridgeJson(),
+    ),
+  );
+
+  @override
+  String websocketUnsubscribe(HyperAxisSubscription subscription) => _invoke(
+    operation: 'websocketUnsubscribe',
+    errorCode: HyperAxisErrorCode.protocol,
+    invoke: () => native_transport.websocketUnsubscribeJson(
+      subscriptionJson: subscription.toBridgeJson(),
+    ),
+  );
+
+  @override
+  String websocketPing() => _invoke(
+    operation: 'websocketPing',
+    errorCode: HyperAxisErrorCode.protocol,
+    invoke: native_transport.websocketPingJson,
+  );
+
+  @override
+  HyperAxisWebSocketMessage parseWebSocketMessage(String message) {
+    final json = _invoke(
+      operation: 'parseWebSocketMessage',
+      errorCode: HyperAxisErrorCode.protocol,
+      invoke: () =>
+          native_transport.parseWebsocketMessageJson(message: message),
+    );
+    return HyperAxisTransportBridgeCodec.decodeWebSocketMessage(json);
   }
 
   @override

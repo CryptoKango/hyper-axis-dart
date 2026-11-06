@@ -7,6 +7,7 @@ import 'api/accounts.dart';
 import 'api/orders.dart';
 import 'api/risk.dart';
 import 'api/runtime.dart';
+import 'api/transport.dart';
 import 'api/users.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -39,6 +40,9 @@ abstract class HyperAxisRustLibApiImplPlatform
   bool? dco_decode_opt_box_autoadd_bool(dynamic raw);
 
   @protected
+  int dco_decode_u_16(dynamic raw);
+
+  @protected
   int dco_decode_u_32(dynamic raw);
 
   @protected
@@ -61,6 +65,9 @@ abstract class HyperAxisRustLibApiImplPlatform
 
   @protected
   bool? sse_decode_opt_box_autoadd_bool(SseDeserializer deserializer);
+
+  @protected
+  int sse_decode_u_16(SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_32(SseDeserializer deserializer);
@@ -91,6 +98,9 @@ abstract class HyperAxisRustLibApiImplPlatform
 
   @protected
   void sse_encode_opt_box_autoadd_bool(bool? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_u_16(int self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_32(int self, SseSerializer serializer);
