@@ -52,6 +52,40 @@ Future<void> main() async {
     throw StateError('Rust recovered an unexpected order signer.');
   }
 
+  final HyperAxisPreparedOrder builderOrder = bridge.prepareLimitOrder(
+    HyperAxisLimitOrderRequest(
+      network: HyperAxisNetwork.mainnet,
+      asset: 3,
+      marketKind: HyperAxisMarketKind.perpetual,
+      sizeDecimals: 2,
+      isBuy: true,
+      limitPrice: '100.00',
+      size: '0.50',
+      nonce: '1234567890001',
+      builder: HyperAxisBuilderFee(
+        address: '0x000000000000000000000000000000000000beef',
+        fee: 100,
+      ),
+    ),
+  );
+  if (!builderOrder.actionJson.contains('"f":100')) {
+    throw StateError('Rust returned an invalid Builder Fee order artifact.');
+  }
+
+  final HyperAxisPreparedUserAction builderApproval = bridge
+      .prepareApproveBuilderFee(
+        const HyperAxisApproveBuilderFeeRequest(
+          network: HyperAxisNetwork.mainnet,
+          builder: '0x000000000000000000000000000000000000beef',
+          maxFeeRate: '0.1%',
+          nonce: '1234567890002',
+        ),
+      );
+  if (!builderApproval.actionJson.contains('approveBuilderFee') ||
+      builderApproval.signingDigestHex.isEmpty) {
+    throw StateError('Rust returned an invalid Builder Fee approval artifact.');
+  }
+
   final HyperAxisPreparedLeverageUpdate leverage = bridge.prepareUpdateLeverage(
     HyperAxisUpdateLeverageRequest(
       network: HyperAxisNetwork.mainnet,

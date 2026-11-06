@@ -154,6 +154,28 @@ void main() {
       expect(finalized.requestJson, contains('updateLeverage'));
     });
 
+    test('delegates builder fee approval preparation and finalization', () {
+      final HyperAxisClient client = HyperAxisClient.withBridge(_FakeBridge());
+      final HyperAxisPreparedUserAction prepared = client
+          .prepareApproveBuilderFee(
+            const HyperAxisApproveBuilderFeeRequest(
+              network: HyperAxisNetwork.mainnet,
+              builder: '0x0000000000000000000000000000000000000002',
+              maxFeeRate: '0.1%',
+              nonce: '1234567890000',
+            ),
+          );
+      final HyperAxisFinalizedAction finalized = client
+          .finalizeApproveBuilderFee(
+            prepared: prepared,
+            signature: const HyperAxisSignature(r: '0x01', s: '0x02', v: 27),
+            expectedSigner: _FakeBridge.user,
+          );
+
+      expect(prepared.signingDigestHex, 'builder-approval-digest');
+      expect(finalized.requestJson, contains('approveBuilderFee'));
+    });
+
     test('rejects leverage above market metadata maximum', () {
       expect(
         () => HyperAxisUpdateLeverageRequest(
@@ -414,6 +436,19 @@ final class _FakeBridge implements HyperAxisBridge {
   }
 
   @override
+  HyperAxisFinalizedAction finalizeApproveBuilderFee({
+    required HyperAxisPreparedUserAction prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    return HyperAxisFinalizedAction(
+      endpoint: 'https://example.test/exchange',
+      requestJson: '{"action":{"type":"approveBuilderFee"}}',
+      recoveredSigner: expectedSigner,
+    );
+  }
+
+  @override
   String normalizeDecimal(String value) => '1.23';
 
   @override
@@ -485,6 +520,19 @@ final class _FakeBridge implements HyperAxisBridge {
       nonce: '1234567890001',
       actionJson: '{"type":"withdraw3"}',
       signingDigestHex: 'withdraw-digest',
+      bridgeJson: '{}',
+    );
+  }
+
+  @override
+  HyperAxisPreparedUserAction prepareApproveBuilderFee(
+    HyperAxisApproveBuilderFeeRequest request,
+  ) {
+    return const HyperAxisPreparedUserAction(
+      network: HyperAxisNetwork.mainnet,
+      nonce: '1234567890000',
+      actionJson: '{"type":"approveBuilderFee"}',
+      signingDigestHex: 'builder-approval-digest',
       bridgeJson: '{}',
     );
   }
@@ -636,6 +684,13 @@ final class _ThrowingBridge implements HyperAxisBridge {
   }) => _fail();
 
   @override
+  HyperAxisFinalizedAction finalizeApproveBuilderFee({
+    required HyperAxisPreparedUserAction prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) => _fail();
+
+  @override
   String normalizeDecimal(String value) => _fail();
 
   @override
@@ -660,6 +715,11 @@ final class _ThrowingBridge implements HyperAxisBridge {
   @override
   HyperAxisPreparedUserAction prepareWithdraw(
     HyperAxisWithdrawRequest request,
+  ) => _fail();
+
+  @override
+  HyperAxisPreparedUserAction prepareApproveBuilderFee(
+    HyperAxisApproveBuilderFeeRequest request,
   ) => _fail();
 
   @override

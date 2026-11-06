@@ -64,6 +64,29 @@ enum HyperAxisOrderGrouping {
   final String wireName;
 }
 
+/// Optional builder fee attribution included in an order action.
+final class HyperAxisBuilderFee {
+  /// Creates exact builder attribution without using floating-point math.
+  factory HyperAxisBuilderFee({required String address, required int fee}) {
+    _requireUnsignedRange('builderFee', fee, 0xffffffff);
+    return HyperAxisBuilderFee._(address: address, fee: fee);
+  }
+
+  const HyperAxisBuilderFee._({required this.address, required this.fee});
+
+  /// Builder EVM address receiving the fee.
+  final String address;
+
+  /// Fee in tenths of a basis point.
+  final int fee;
+
+  /// Encodes the exact Rust request shape.
+  Map<String, Object?> toBridgeJson() => <String, Object?>{
+    'address': address,
+    'fee': fee,
+  };
+}
+
 /// Exact input for preparing one Hyperliquid limit order in Rust.
 final class HyperAxisLimitOrderRequest {
   /// Creates a limit-order request without performing protocol calculations.
@@ -80,6 +103,7 @@ final class HyperAxisLimitOrderRequest {
     HyperAxisTimeInForce timeInForce = HyperAxisTimeInForce.gtc,
     String? clientOrderId,
     HyperAxisOrderGrouping grouping = HyperAxisOrderGrouping.none,
+    HyperAxisBuilderFee? builder,
     String? vaultAddress,
     String? expiresAfter,
   }) {
@@ -97,6 +121,7 @@ final class HyperAxisLimitOrderRequest {
       timeInForce: timeInForce,
       clientOrderId: clientOrderId,
       grouping: grouping,
+      builder: builder,
       nonce: nonce,
       vaultAddress: vaultAddress,
       expiresAfter: expiresAfter,
@@ -115,6 +140,7 @@ final class HyperAxisLimitOrderRequest {
     required this.timeInForce,
     required this.clientOrderId,
     required this.grouping,
+    required this.builder,
     required this.nonce,
     required this.vaultAddress,
     required this.expiresAfter,
@@ -153,6 +179,9 @@ final class HyperAxisLimitOrderRequest {
   /// Batch grouping mode.
   final HyperAxisOrderGrouping grouping;
 
+  /// Optional builder fee attribution.
+  final HyperAxisBuilderFee? builder;
+
   /// Millisecond nonce encoded as an unsigned decimal string.
   final String nonce;
 
@@ -175,6 +204,7 @@ final class HyperAxisLimitOrderRequest {
     'timeInForce': timeInForce.wireName,
     'clientOrderId': clientOrderId,
     'grouping': grouping.wireName,
+    'builder': builder?.toBridgeJson(),
     'nonce': nonce,
     'vaultAddress': vaultAddress,
     'expiresAfter': expiresAfter,

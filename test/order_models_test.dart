@@ -15,6 +15,10 @@ void main() {
       size: '0.50',
       nonce: '18446744073709551615',
       expiresAfter: '18446744073709551615',
+      builder: HyperAxisBuilderFee(
+        address: '0x0000000000000000000000000000000000000002',
+        fee: 100,
+      ),
     );
 
     final Object? decoded = jsonDecode(request.toBridgeJson());
@@ -26,6 +30,29 @@ void main() {
     expect(object['grouping'], 'na');
     expect(object['nonce'], '18446744073709551615');
     expect(object['expiresAfter'], '18446744073709551615');
+    expect(object['builder'], <String, Object?>{
+      'address': '0x0000000000000000000000000000000000000002',
+      'fee': 100,
+    });
+  });
+
+  test('builder approval request encodes the exact Rust schema', () {
+    const HyperAxisApproveBuilderFeeRequest request =
+        HyperAxisApproveBuilderFeeRequest(
+          network: HyperAxisNetwork.mainnet,
+          builder: '0x0000000000000000000000000000000000000002',
+          maxFeeRate: '0.1%',
+          nonce: '18446744073709551615',
+        );
+
+    final Map<String, Object?> object =
+        jsonDecode(request.toBridgeJson())! as Map<String, Object?>;
+    expect(object, <String, Object?>{
+      'network': 'mainnet',
+      'builder': '0x0000000000000000000000000000000000000002',
+      'maxFeeRate': '0.1%',
+      'nonce': '18446744073709551615',
+    });
   });
 
   test('limit-order request rejects values outside bridge integer ranges', () {

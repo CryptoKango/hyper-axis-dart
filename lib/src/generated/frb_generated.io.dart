@@ -7,6 +7,7 @@ import 'api/accounts.dart';
 import 'api/orders.dart';
 import 'api/risk.dart';
 import 'api/runtime.dart';
+import 'api/users.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' as ffi;

@@ -1,5 +1,9 @@
 ## Unreleased
 
+- 单笔订单支持 Builder code `{address, fee}`，并由 Rust Core 校验后编码为
+  Hyperliquid `{b, f}`。
+- 新增 `approveBuilderFee` 的准备、外部签名验证和 exchange 请求最终化 API。
+
 ## 0.4.0 - 2026-11-04
 
 - 新增 Hyperliquid 撤单与提现的准备、外部签名验证和 exchange 请求构建。

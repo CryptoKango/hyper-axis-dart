@@ -5,6 +5,7 @@ import '../logging/hyper_axis_log.dart';
 import '../models/accounts.dart';
 import '../models/orders.dart';
 import '../models/risk.dart';
+import '../models/users.dart';
 import '../version.dart';
 import 'retryable_async_cache.dart';
 
@@ -89,6 +90,32 @@ final class HyperAxisClient {
     return _guard(
       operation: 'finalizeOrder',
       invoke: () => _bridge.finalizeOrder(
+        prepared: prepared,
+        signature: signature,
+        expectedSigner: expectedSigner,
+      ),
+    );
+  }
+
+  /// Prepares a maximum Builder Fee approval for main-wallet signing.
+  HyperAxisPreparedUserAction prepareApproveBuilderFee(
+    HyperAxisApproveBuilderFeeRequest request,
+  ) {
+    return _guard(
+      operation: 'prepareApproveBuilderFee',
+      invoke: () => _bridge.prepareApproveBuilderFee(request),
+    );
+  }
+
+  /// Verifies a main-wallet signature and finalizes Builder Fee approval.
+  HyperAxisFinalizedAction finalizeApproveBuilderFee({
+    required HyperAxisPreparedUserAction prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    return _guard(
+      operation: 'finalizeApproveBuilderFee',
+      invoke: () => _bridge.finalizeApproveBuilderFee(
         prepared: prepared,
         signature: signature,
         expectedSigner: expectedSigner,

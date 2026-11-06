@@ -8,4 +8,5 @@ export 'src/logging/hyper_axis_log.dart';
 export 'src/models/accounts.dart';
 export 'src/models/orders.dart';
 export 'src/models/risk.dart';
+export 'src/models/users.dart';
 export 'src/version.dart';

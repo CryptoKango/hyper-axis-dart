@@ -3,11 +3,13 @@ import '../generated/api/accounts.dart' as native_accounts;
 import '../generated/api/orders.dart' as native_orders;
 import '../generated/api/risk.dart' as native_risk;
 import '../generated/api/runtime.dart' as native;
+import '../generated/api/users.dart' as native_users;
 import '../generated/frb_generated.dart';
 import '../logging/hyper_axis_log.dart';
 import '../models/accounts.dart';
 import '../models/orders.dart';
 import '../models/risk.dart';
+import '../models/users.dart';
 import 'hyper_axis_account_bridge_codec.dart';
 import 'hyper_axis_bridge.dart';
 import 'hyper_axis_bridge_codec.dart';
@@ -75,6 +77,40 @@ final class FrbHyperAxisBridge implements HyperAxisBridge {
       operation: 'finalizeOrder',
       errorCode: HyperAxisErrorCode.signing,
       invoke: () => native_orders.finalizeOrderJson(
+        preparedJson: prepared.bridgeJson,
+        r: signature.r,
+        s: signature.s,
+        v: signature.v,
+        expectedSigner: expectedSigner,
+      ),
+    );
+    return HyperAxisBridgeCodec.decodeFinalizedAction(json);
+  }
+
+  @override
+  HyperAxisPreparedUserAction prepareApproveBuilderFee(
+    HyperAxisApproveBuilderFeeRequest request,
+  ) {
+    final String json = _invoke(
+      operation: 'prepareApproveBuilderFee',
+      errorCode: HyperAxisErrorCode.protocol,
+      invoke: () => native_users.prepareApproveBuilderFeeJson(
+        requestJson: request.toBridgeJson(),
+      ),
+    );
+    return HyperAxisAccountBridgeCodec.decodePreparedUserAction(json);
+  }
+
+  @override
+  HyperAxisFinalizedAction finalizeApproveBuilderFee({
+    required HyperAxisPreparedUserAction prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    final String json = _invoke(
+      operation: 'finalizeApproveBuilderFee',
+      errorCode: HyperAxisErrorCode.signing,
+      invoke: () => native_users.finalizeApproveBuilderFeeJson(
         preparedJson: prepared.bridgeJson,
         r: signature.r,
         s: signature.s,
