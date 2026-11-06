@@ -56,6 +56,11 @@ abstract interface class HyperAxisBridge {
   /// Validates and prepares one limit order for platform signing.
   HyperAxisPreparedOrder prepareLimitOrder(HyperAxisLimitOrderRequest request);
 
+  /// Validates and prepares one or more trigger orders.
+  HyperAxisPreparedOrder prepareTriggerOrders(
+    HyperAxisTriggerOrdersRequest request,
+  );
+
   /// Verifies the signature and builds the exact exchange request.
   HyperAxisFinalizedAction finalizeOrder({
     required HyperAxisPreparedOrder prepared,
@@ -92,6 +97,18 @@ abstract interface class HyperAxisBridge {
 
   /// Verifies the signature and builds the leverage exchange request.
   HyperAxisFinalizedAction finalizeUpdateLeverage({
+    required HyperAxisPreparedLeverageUpdate prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  });
+
+  /// Validates and prepares an isolated-margin delta.
+  HyperAxisPreparedLeverageUpdate prepareUpdateIsolatedMargin(
+    HyperAxisUpdateIsolatedMarginRequest request,
+  );
+
+  /// Verifies and finalizes an isolated-margin delta.
+  HyperAxisFinalizedAction finalizeUpdateIsolatedMargin({
     required HyperAxisPreparedLeverageUpdate prepared,
     required HyperAxisSignature signature,
     required String expectedSigner,

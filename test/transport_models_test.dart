@@ -4,6 +4,27 @@ import 'package:hyper_axis/hyper_axis.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('history queries preserve exact user and millisecond strings', () {
+    const user = '0x000000000000000000000000000000000000beef';
+    final orders = HyperAxisInfoQuery.historicalOrders(user);
+    final funding = HyperAxisInfoQuery.userFunding(
+      user: user,
+      startTime: 1,
+      endTime: 2,
+    );
+
+    expect(jsonDecode(orders.toBridgeJson()), <String, Object?>{
+      'type': 'historicalOrders',
+      'user': user,
+    });
+    expect(jsonDecode(funding.toBridgeJson()), <String, Object?>{
+      'type': 'userFunding',
+      'user': user,
+      'startTime': '1',
+      'endTime': '2',
+    });
+  });
+
   group('HyperAxisInfoQuery.orderStatus', () {
     test('encodes a client order id selector', () {
       final query = HyperAxisInfoQuery.orderStatus(

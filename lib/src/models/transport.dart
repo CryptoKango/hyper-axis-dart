@@ -100,6 +100,28 @@ final class HyperAxisInfoQuery {
     <String, Object?>{'type': 'userFills', 'user': user},
   );
 
+  /// Historical orders for one user.
+  factory HyperAxisInfoQuery.historicalOrders(String user) =>
+      HyperAxisInfoQuery._(<String, Object?>{
+        'type': 'historicalOrders',
+        'user': user,
+      });
+
+  /// Funding ledger entries for one user and time range.
+  factory HyperAxisInfoQuery.userFunding({
+    required String user,
+    required int startTime,
+    int? endTime,
+  }) {
+    final value = <String, Object?>{
+      'type': 'userFunding',
+      'user': user,
+      'startTime': startTime.toString(),
+    };
+    if (endTime != null) value['endTime'] = endTime.toString();
+    return HyperAxisInfoQuery._(value);
+  }
+
   /// User-specific data for one active perpetual market.
   factory HyperAxisInfoQuery.activeAssetData({
     required String user,

@@ -136,3 +136,75 @@ final class HyperAxisPreparedLeverageUpdate {
   /// Complete opaque artifact passed back to Rust during finalization.
   final String bridgeJson;
 }
+
+/// Exact input for adding or removing isolated position margin.
+final class HyperAxisUpdateIsolatedMarginRequest {
+  /// Creates an exact isolated-margin update without floating-point math.
+  factory HyperAxisUpdateIsolatedMarginRequest({
+    required HyperAxisNetwork network,
+    required int asset,
+    required bool isBuy,
+    required String usdDelta,
+    required String nonce,
+    String? vaultAddress,
+    String? expiresAfter,
+  }) {
+    if (asset < 0 || asset > 0xffffffff) {
+      throw HyperAxisException(
+        code: HyperAxisErrorCode.invalidArgument,
+        message: 'asset is outside its unsigned integer range.',
+      );
+    }
+    return HyperAxisUpdateIsolatedMarginRequest._(
+      network: network,
+      asset: asset,
+      isBuy: isBuy,
+      usdDelta: usdDelta,
+      nonce: nonce,
+      vaultAddress: vaultAddress,
+      expiresAfter: expiresAfter,
+    );
+  }
+
+  const HyperAxisUpdateIsolatedMarginRequest._({
+    required this.network,
+    required this.asset,
+    required this.isBuy,
+    required this.usdDelta,
+    required this.nonce,
+    required this.vaultAddress,
+    required this.expiresAfter,
+  });
+
+  /// Environment used for signing and submission.
+  final HyperAxisNetwork network;
+
+  /// Hyperliquid numeric perpetual asset identifier.
+  final int asset;
+
+  /// Position side whose isolated margin is updated.
+  final bool isBuy;
+
+  /// Signed US dollar delta encoded as an exact decimal string.
+  final String usdDelta;
+
+  /// Nonce encoded as an unsigned decimal string.
+  final String nonce;
+
+  /// Optional vault or subaccount address.
+  final String? vaultAddress;
+
+  /// Optional expiry timestamp encoded as an unsigned decimal string.
+  final String? expiresAfter;
+
+  /// Encodes the exact Rust request shape.
+  String toBridgeJson() => jsonEncode(<String, Object?>{
+    'network': network.wireName,
+    'asset': asset,
+    'isBuy': isBuy,
+    'usdDelta': usdDelta,
+    'nonce': nonce,
+    'vaultAddress': vaultAddress,
+    'expiresAfter': expiresAfter,
+  });
+}

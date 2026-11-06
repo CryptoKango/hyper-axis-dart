@@ -7,7 +7,7 @@ void main() {
       final _FakeBridge bridge = _FakeBridge();
       final HyperAxisClient client = HyperAxisClient.withBridge(bridge);
 
-      expect(client.protocolVersion, '0.3.4');
+      expect(client.protocolVersion, '0.3.5');
       expect(client.normalizeDecimal('001.2300'), '1.23');
 
       final HyperAxisLoggingConfig applied = client.configureLogging(
@@ -306,7 +306,7 @@ void main() {
 }
 
 final class _FakeBridge implements HyperAxisBridge {
-  _FakeBridge({this.protocolVersion = '0.3.4'});
+  _FakeBridge({this.protocolVersion = '0.3.5'});
 
   static const String user = '0x0000000000000000000000000000000000000001';
 
@@ -405,6 +405,19 @@ final class _FakeBridge implements HyperAxisBridge {
     return HyperAxisFinalizedAction(
       endpoint: 'https://example.test/exchange',
       requestJson: '{"action":{"type":"updateLeverage"}}',
+      recoveredSigner: expectedSigner,
+    );
+  }
+
+  @override
+  HyperAxisFinalizedAction finalizeUpdateIsolatedMargin({
+    required HyperAxisPreparedLeverageUpdate prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    return HyperAxisFinalizedAction(
+      endpoint: 'https://example.test/exchange',
+      requestJson: '{"action":{"type":"updateIsolatedMargin"}}',
       recoveredSigner: expectedSigner,
     );
   }
@@ -526,6 +539,22 @@ final class _FakeBridge implements HyperAxisBridge {
   }
 
   @override
+  HyperAxisPreparedOrder prepareTriggerOrders(
+    HyperAxisTriggerOrdersRequest request,
+  ) => prepareLimitOrder(
+    HyperAxisLimitOrderRequest(
+      network: request.network,
+      asset: request.orders.first.asset,
+      marketKind: request.orders.first.marketKind,
+      sizeDecimals: request.orders.first.sizeDecimals,
+      isBuy: request.orders.first.isBuy,
+      limitPrice: request.orders.first.limitPrice,
+      size: request.orders.first.size,
+      nonce: request.nonce,
+    ),
+  );
+
+  @override
   HyperAxisPreparedOrder prepareCancel(HyperAxisCancelRequest request) {
     return const HyperAxisPreparedOrder(
       network: HyperAxisNetwork.mainnet,
@@ -556,6 +585,20 @@ final class _FakeBridge implements HyperAxisBridge {
       bridgeJson: '{}',
     );
   }
+
+  @override
+  HyperAxisPreparedLeverageUpdate prepareUpdateIsolatedMargin(
+    HyperAxisUpdateIsolatedMarginRequest request,
+  ) => prepareUpdateLeverage(
+    HyperAxisUpdateLeverageRequest(
+      network: request.network,
+      asset: request.asset,
+      isCross: false,
+      leverage: 1,
+      maxLeverage: 1,
+      nonce: request.nonce,
+    ),
+  );
 
   @override
   HyperAxisPreparedUserAction prepareUsdClassTransfer(
@@ -673,7 +716,7 @@ final class _ThrowingBridge implements HyperAxisBridge {
   }
 
   @override
-  String get protocolVersion => '0.3.4';
+  String get protocolVersion => '0.3.5';
 
   @override
   String accountWebSocketUrl(HyperAxisNetwork network) => _fail();
@@ -723,6 +766,13 @@ final class _ThrowingBridge implements HyperAxisBridge {
 
   @override
   HyperAxisFinalizedAction finalizeUpdateLeverage({
+    required HyperAxisPreparedLeverageUpdate prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) => _fail();
+
+  @override
+  HyperAxisFinalizedAction finalizeUpdateIsolatedMargin({
     required HyperAxisPreparedLeverageUpdate prepared,
     required HyperAxisSignature signature,
     required String expectedSigner,
@@ -796,12 +846,22 @@ final class _ThrowingBridge implements HyperAxisBridge {
   }
 
   @override
+  HyperAxisPreparedOrder prepareTriggerOrders(
+    HyperAxisTriggerOrdersRequest request,
+  ) => _fail();
+
+  @override
   HyperAxisPreparedOrder prepareCancel(HyperAxisCancelRequest request) =>
       _fail();
 
   @override
   HyperAxisPreparedLeverageUpdate prepareUpdateLeverage(
     HyperAxisUpdateLeverageRequest request,
+  ) => _fail();
+
+  @override
+  HyperAxisPreparedLeverageUpdate prepareUpdateIsolatedMargin(
+    HyperAxisUpdateIsolatedMarginRequest request,
   ) => _fail();
 
   @override

@@ -34,3 +34,25 @@ String finalizeUpdateLeverageJson({
   v: v,
   expectedSigner: expectedSigner,
 );
+
+/// Validates an exact isolated-margin USD delta and returns its opaque artifact.
+String prepareUpdateIsolatedMarginJson({required String requestJson}) =>
+    HyperAxisRustLib.instance.api.crateApiRiskPrepareUpdateIsolatedMarginJson(
+      requestJson: requestJson,
+    );
+
+/// Revalidates and finalizes an isolated-margin update after external signing.
+String finalizeUpdateIsolatedMarginJson({
+  required String preparedJson,
+  required String r,
+  required String s,
+  required int v,
+  required String expectedSigner,
+}) =>
+    HyperAxisRustLib.instance.api.crateApiRiskFinalizeUpdateIsolatedMarginJson(
+      preparedJson: preparedJson,
+      r: r,
+      s: s,
+      v: v,
+      expectedSigner: expectedSigner,
+    );

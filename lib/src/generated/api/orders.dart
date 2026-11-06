@@ -19,6 +19,17 @@ String prepareLimitOrderJson({required String requestJson}) => HyperAxisRustLib
     .api
     .crateApiOrdersPrepareLimitOrderJson(requestJson: requestJson);
 
+/// Validates a mixed batch of limit and trigger orders and returns the opaque
+/// prepared artifact.
+///
+/// # Errors
+///
+/// Returns a sanitized protocol or JSON error.
+String prepareOrdersJson({required String requestJson}) => HyperAxisRustLib
+    .instance
+    .api
+    .crateApiOrdersPrepareOrdersJson(requestJson: requestJson);
+
 /// Revalidates a prepared order, verifies its signature, and returns the exact
 /// exchange request artifact.
 ///

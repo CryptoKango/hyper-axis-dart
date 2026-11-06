@@ -93,4 +93,33 @@ void main() {
     expect(cancel['oid'], '18446744073709551615');
     expect(object['nonce'], '18446744073709551615');
   });
+
+  test('trigger-order request encodes the exact mixed-order schema', () {
+    final request = HyperAxisTriggerOrdersRequest(
+      network: HyperAxisNetwork.mainnet,
+      grouping: HyperAxisOrderGrouping.positionTakeProfitStopLoss,
+      nonce: '1234567890000',
+      orders: <HyperAxisTriggerOrderInput>[
+        HyperAxisTriggerOrderInput(
+          asset: 3,
+          marketKind: HyperAxisMarketKind.perpetual,
+          sizeDecimals: 2,
+          isBuy: false,
+          limitPrice: '95',
+          triggerPrice: '96',
+          size: '0.5',
+          reduceOnly: true,
+          isMarket: true,
+          triggerKind: HyperAxisTriggerKind.stopLoss,
+        ),
+      ],
+    );
+
+    final object = jsonDecode(request.toBridgeJson()) as Map<String, Object?>;
+    final order = (object['orders'] as List<Object?>).single! as Map;
+    expect(object['grouping'], 'positionTpsl');
+    expect(order['kind'], 'trigger');
+    expect(order['triggerPrice'], '96');
+    expect(order['triggerKind'], 'sl');
+  });
 }

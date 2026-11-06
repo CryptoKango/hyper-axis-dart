@@ -188,6 +188,19 @@ final class FrbHyperAxisBridge implements HyperAxisBridge {
   }
 
   @override
+  HyperAxisPreparedOrder prepareTriggerOrders(
+    HyperAxisTriggerOrdersRequest request,
+  ) {
+    final String json = _invoke(
+      operation: 'prepareTriggerOrders',
+      errorCode: HyperAxisErrorCode.protocol,
+      invoke: () =>
+          native_orders.prepareOrdersJson(requestJson: request.toBridgeJson()),
+    );
+    return HyperAxisBridgeCodec.decodePreparedOrder(json);
+  }
+
+  @override
   HyperAxisFinalizedAction finalizeOrder({
     required HyperAxisPreparedOrder prepared,
     required HyperAxisSignature signature,
@@ -296,6 +309,40 @@ final class FrbHyperAxisBridge implements HyperAxisBridge {
       operation: 'finalizeUpdateLeverage',
       errorCode: HyperAxisErrorCode.signing,
       invoke: () => native_risk.finalizeUpdateLeverageJson(
+        preparedJson: prepared.bridgeJson,
+        r: signature.r,
+        s: signature.s,
+        v: signature.v,
+        expectedSigner: expectedSigner,
+      ),
+    );
+    return HyperAxisBridgeCodec.decodeFinalizedAction(json);
+  }
+
+  @override
+  HyperAxisPreparedLeverageUpdate prepareUpdateIsolatedMargin(
+    HyperAxisUpdateIsolatedMarginRequest request,
+  ) {
+    final String json = _invoke(
+      operation: 'prepareUpdateIsolatedMargin',
+      errorCode: HyperAxisErrorCode.protocol,
+      invoke: () => native_risk.prepareUpdateIsolatedMarginJson(
+        requestJson: request.toBridgeJson(),
+      ),
+    );
+    return HyperAxisBridgeCodec.decodePreparedLeverageUpdate(json);
+  }
+
+  @override
+  HyperAxisFinalizedAction finalizeUpdateIsolatedMargin({
+    required HyperAxisPreparedLeverageUpdate prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    final String json = _invoke(
+      operation: 'finalizeUpdateIsolatedMargin',
+      errorCode: HyperAxisErrorCode.signing,
+      invoke: () => native_risk.finalizeUpdateIsolatedMarginJson(
         preparedJson: prepared.bridgeJson,
         r: signature.r,
         s: signature.s,

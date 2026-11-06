@@ -70,6 +70,20 @@ enum HyperAxisOrderGrouping {
   final String wireName;
 }
 
+/// Trigger-order classification used by Hyperliquid conditional orders.
+enum HyperAxisTriggerKind {
+  /// Take-profit trigger.
+  takeProfit('tp'),
+
+  /// Stop-loss trigger.
+  stopLoss('sl');
+
+  const HyperAxisTriggerKind(this.wireName);
+
+  /// Exact Rust wire representation.
+  final String wireName;
+}
+
 /// Optional builder fee attribution included in an order action.
 final class HyperAxisBuilderFee {
   /// Creates exact builder attribution without using floating-point math.
@@ -91,6 +105,179 @@ final class HyperAxisBuilderFee {
     'address': address,
     'fee': fee,
   };
+}
+
+/// One trigger order accepted by the mixed order preparation API.
+final class HyperAxisTriggerOrderInput {
+  /// Creates an exact trigger order without performing price calculations.
+  factory HyperAxisTriggerOrderInput({
+    required int asset,
+    required HyperAxisMarketKind marketKind,
+    required int sizeDecimals,
+    required bool isBuy,
+    required String limitPrice,
+    required String triggerPrice,
+    required String size,
+    required bool reduceOnly,
+    required bool isMarket,
+    required HyperAxisTriggerKind triggerKind,
+    String? clientOrderId,
+  }) {
+    _requireUnsignedRange('asset', asset, 0xffffffff);
+    _requireUnsignedRange('sizeDecimals', sizeDecimals, 0xff);
+    return HyperAxisTriggerOrderInput._(
+      asset: asset,
+      marketKind: marketKind,
+      sizeDecimals: sizeDecimals,
+      isBuy: isBuy,
+      limitPrice: limitPrice,
+      triggerPrice: triggerPrice,
+      size: size,
+      reduceOnly: reduceOnly,
+      isMarket: isMarket,
+      triggerKind: triggerKind,
+      clientOrderId: clientOrderId,
+    );
+  }
+
+  const HyperAxisTriggerOrderInput._({
+    required this.asset,
+    required this.marketKind,
+    required this.sizeDecimals,
+    required this.isBuy,
+    required this.limitPrice,
+    required this.triggerPrice,
+    required this.size,
+    required this.reduceOnly,
+    required this.isMarket,
+    required this.triggerKind,
+    required this.clientOrderId,
+  });
+
+  /// Hyperliquid numeric asset identifier.
+  final int asset;
+
+  /// Market family controlling precision rules.
+  final HyperAxisMarketKind marketKind;
+
+  /// Exact size precision published by market metadata.
+  final int sizeDecimals;
+
+  /// Whether the trigger creates a buy-side order.
+  final bool isBuy;
+
+  /// Limit price submitted after the trigger fires.
+  final String limitPrice;
+
+  /// Exact price that activates the conditional order.
+  final String triggerPrice;
+
+  /// Exact order size in base-asset units.
+  final String size;
+
+  /// Whether the order may only reduce an existing position.
+  final bool reduceOnly;
+
+  /// Whether the activated order should execute as a market order.
+  final bool isMarket;
+
+  /// Take-profit or stop-loss classification.
+  final HyperAxisTriggerKind triggerKind;
+
+  /// Optional client order identifier used for idempotent tracking.
+  final String? clientOrderId;
+
+  /// Encodes the exact mixed-order input expected by Rust.
+  Map<String, Object?> toBridgeJson() => <String, Object?>{
+    'kind': 'trigger',
+    'asset': asset,
+    'marketKind': marketKind.wireName,
+    'szDecimals': sizeDecimals,
+    'isBuy': isBuy,
+    'limitPrice': limitPrice,
+    'triggerPrice': triggerPrice,
+    'size': size,
+    'reduceOnly': reduceOnly,
+    'isMarket': isMarket,
+    'triggerKind': triggerKind.wireName,
+    'clientOrderId': clientOrderId,
+  };
+}
+
+/// Exact input for preparing one or more trigger orders atomically.
+final class HyperAxisTriggerOrdersRequest {
+  /// Creates one atomic conditional-order action.
+  factory HyperAxisTriggerOrdersRequest({
+    required HyperAxisNetwork network,
+    required List<HyperAxisTriggerOrderInput> orders,
+    required HyperAxisOrderGrouping grouping,
+    required String nonce,
+    HyperAxisBuilderFee? builder,
+    String? vaultAddress,
+    String? expiresAfter,
+  }) {
+    if (orders.isEmpty) {
+      throw HyperAxisException(
+        code: HyperAxisErrorCode.invalidArgument,
+        message: 'orders must not be empty.',
+      );
+    }
+    _requireUnsignedDecimal('nonce', nonce);
+    if (expiresAfter != null) {
+      _requireUnsignedDecimal('expiresAfter', expiresAfter);
+    }
+    return HyperAxisTriggerOrdersRequest._(
+      network: network,
+      orders: List<HyperAxisTriggerOrderInput>.unmodifiable(orders),
+      grouping: grouping,
+      nonce: nonce,
+      builder: builder,
+      vaultAddress: vaultAddress,
+      expiresAfter: expiresAfter,
+    );
+  }
+
+  const HyperAxisTriggerOrdersRequest._({
+    required this.network,
+    required this.orders,
+    required this.grouping,
+    required this.nonce,
+    required this.builder,
+    required this.vaultAddress,
+    required this.expiresAfter,
+  });
+
+  /// Environment used for signing and submission.
+  final HyperAxisNetwork network;
+
+  /// Trigger orders included in the atomic action.
+  final List<HyperAxisTriggerOrderInput> orders;
+
+  /// Hyperliquid TP/SL grouping behavior.
+  final HyperAxisOrderGrouping grouping;
+
+  /// Nonce encoded as an unsigned decimal string.
+  final String nonce;
+
+  /// Optional builder fee attribution.
+  final HyperAxisBuilderFee? builder;
+
+  /// Optional vault or subaccount address.
+  final String? vaultAddress;
+
+  /// Optional expiry timestamp encoded as an unsigned decimal string.
+  final String? expiresAfter;
+
+  /// Encodes the exact Rust request shape.
+  String toBridgeJson() => jsonEncode(<String, Object?>{
+    'network': network.wireName,
+    'orders': orders.map((order) => order.toBridgeJson()).toList(),
+    'grouping': grouping.wireName,
+    'builder': builder?.toBridgeJson(),
+    'nonce': nonce,
+    'vaultAddress': vaultAddress,
+    'expiresAfter': expiresAfter,
+  });
 }
 
 /// Exact input for preparing one Hyperliquid limit order in Rust.

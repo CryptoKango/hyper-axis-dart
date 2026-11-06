@@ -152,6 +152,16 @@ final class HyperAxisClient {
     );
   }
 
+  /// Validates and prepares one or more trigger orders.
+  HyperAxisPreparedOrder prepareTriggerOrders(
+    HyperAxisTriggerOrdersRequest request,
+  ) {
+    return _guard(
+      operation: 'prepareTriggerOrders',
+      invoke: () => _bridge.prepareTriggerOrders(request),
+    );
+  }
+
   /// Verifies a platform signature and builds the canonical exchange request.
   HyperAxisFinalizedAction finalizeOrder({
     required HyperAxisPreparedOrder prepared,
@@ -237,6 +247,32 @@ final class HyperAxisClient {
     return _guard(
       operation: 'finalizeUpdateLeverage',
       invoke: () => _bridge.finalizeUpdateLeverage(
+        prepared: prepared,
+        signature: signature,
+        expectedSigner: expectedSigner,
+      ),
+    );
+  }
+
+  /// Validates and prepares an isolated-margin delta.
+  HyperAxisPreparedLeverageUpdate prepareUpdateIsolatedMargin(
+    HyperAxisUpdateIsolatedMarginRequest request,
+  ) {
+    return _guard(
+      operation: 'prepareUpdateIsolatedMargin',
+      invoke: () => _bridge.prepareUpdateIsolatedMargin(request),
+    );
+  }
+
+  /// Verifies a platform signature and finalizes an isolated-margin delta.
+  HyperAxisFinalizedAction finalizeUpdateIsolatedMargin({
+    required HyperAxisPreparedLeverageUpdate prepared,
+    required HyperAxisSignature signature,
+    required String expectedSigner,
+  }) {
+    return _guard(
+      operation: 'finalizeUpdateIsolatedMargin',
+      invoke: () => _bridge.finalizeUpdateIsolatedMargin(
         prepared: prepared,
         signature: signature,
         expectedSigner: expectedSigner,

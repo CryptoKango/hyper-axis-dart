@@ -7,10 +7,10 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_rust_bridge_hooks/flutter_rust_bridge_hooks.dart';
 import 'package:path/path.dart' as path;
 
-const _coreTag = 'v0.3.4';
-const _coreCommit = '30938dc352433320e2e302f3d67e9491adeea958';
+const _coreTag = 'v0.3.5';
+const _coreCommit = '68a5d2a24aa3f48b55f649c0094b30956af2acc0';
 const _sourceArchiveSha256 =
-    '423bb4907f4d8bacf01a5fb3f9c754a8dce565541fdab45b05ea89753ce42330';
+    '53fd5a702c030c71b663bf3bd59dee16a397589e02dd06169fb3b6606306b84d';
 const _sourceArchiveUrl =
     'https://github.com/CryptoKango/hyper-axis/archive/refs/tags/'
     '$_coreTag.tar.gz';
@@ -163,7 +163,7 @@ final class _CoreSourceCache {
   Future<void> _extractArchive(Uint8List bytes, Directory destination) async {
     final tarBytes = GZipDecoder().decodeBytes(bytes);
     final archive = TarDecoder().decodeBytes(tarBytes);
-    const archiveRoot = 'hyper-axis-0.3.4/';
+    const archiveRoot = 'hyper-axis-0.3.5/';
 
     for (final entry in archive) {
       if (!entry.name.startsWith(archiveRoot)) {

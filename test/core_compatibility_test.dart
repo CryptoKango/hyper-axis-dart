@@ -8,10 +8,10 @@ void main() {
     final nativeHook = File('hook/build.dart').readAsStringSync();
     final compatibility = File('CORE_COMPATIBILITY.md').readAsStringSync();
 
-    const tag = 'v0.3.4';
-    const commit = '30938dc352433320e2e302f3d67e9491adeea958';
+    const tag = 'v0.3.5';
+    const commit = '68a5d2a24aa3f48b55f649c0094b30956af2acc0';
     const sourceSha256 =
-        '423bb4907f4d8bacf01a5fb3f9c754a8dce565541fdab45b05ea89753ce42330';
+        '53fd5a702c030c71b663bf3bd59dee16a397589e02dd06169fb3b6606306b84d';
 
     expect(shellLock, contains(tag));
     expect(shellLock, contains(commit));

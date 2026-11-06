@@ -1,3 +1,10 @@
+## 0.5.3 - 2026-11-06
+
+- 新增原子止盈/止损触发单的准备与最终化 API。
+- 新增逐仓保证金调整的准备与最终化 API。
+- 新增 `historicalOrders` 与 `userFunding` 强类型 Info 查询。
+- Rust Core 固定升级至 v0.3.5。
+
 ## 0.5.2 - 2026-11-06
 
 - 新增 `orderStatus` Info 查询，支持通过十进制 `oid` 或 128-bit `cloid`
