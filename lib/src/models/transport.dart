@@ -122,6 +122,21 @@ final class HyperAxisInfoQuery {
     return HyperAxisInfoQuery._(value);
   }
 
+  /// Non-funding ledger updates for one user and time range.
+  factory HyperAxisInfoQuery.userNonFundingLedgerUpdates({
+    required String user,
+    required int startTime,
+    int? endTime,
+  }) {
+    final value = <String, Object?>{
+      'type': 'userNonFundingLedgerUpdates',
+      'user': user,
+      'startTime': startTime.toString(),
+    };
+    if (endTime != null) value['endTime'] = endTime.toString();
+    return HyperAxisInfoQuery._(value);
+  }
+
   /// User-specific data for one active perpetual market.
   factory HyperAxisInfoQuery.activeAssetData({
     required String user,

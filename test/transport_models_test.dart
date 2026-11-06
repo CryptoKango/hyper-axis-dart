@@ -12,6 +12,11 @@ void main() {
       startTime: 1,
       endTime: 2,
     );
+    final ledger = HyperAxisInfoQuery.userNonFundingLedgerUpdates(
+      user: user,
+      startTime: 3,
+      endTime: 4,
+    );
 
     expect(jsonDecode(orders.toBridgeJson()), <String, Object?>{
       'type': 'historicalOrders',
@@ -22,6 +27,12 @@ void main() {
       'user': user,
       'startTime': '1',
       'endTime': '2',
+    });
+    expect(jsonDecode(ledger.toBridgeJson()), <String, Object?>{
+      'type': 'userNonFundingLedgerUpdates',
+      'user': user,
+      'startTime': '3',
+      'endTime': '4',
     });
   });
 
